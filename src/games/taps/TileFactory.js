@@ -1,6 +1,5 @@
 import { TAPS_CONFIG } from "./config.js";
 
-// Factory for creating different types of tiles
 export class TileFactory {
 	constructor(scene, selectedSprite) {
 		this.scene = scene;
@@ -26,35 +25,34 @@ export class TileFactory {
 		const tile = this.scene.add.image(x, y, this.selectedSprite);
 		tile.setScale(0.7);
 		tile.setInteractive({ useHandCursor: true });
-		tile.setDepth(10); // Set depth for proper rendering
+		tile.setDepth(10);
 		tile.tappable = true;
 		tile.row = row;
 		tile.col = col;
 		tile.isCorrect = true;
 		tile.isActive = true;
-		tile.type = "image"; // Mark as image type
+		tile.type = "image";
 		return tile;
 	}
 
 	createLosingTile(x, y, row, col) {
-		// Create a placeholder image for the "wrong" tile that we can texture
-		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000); // Red for losing tile
+		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000);
 		tile.setStrokeStyle(2, 0x000000);
 		tile.setInteractive({ useHandCursor: true });
-		tile.setDepth(10); // Set depth for proper rendering
+		tile.setDepth(10);
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;
 		tile.isCorrect = false;
 		tile.isActive = true;
-		tile.type = "rectangle"; // Mark as rectangle type
+		tile.type = "rectangle";
 		return tile;
 	}
 
 	createPreviewTile(x, y, row, col) {
 		const tile = this.scene.add.image(x, y, this.selectedSprite);
 		tile.setScale(0.7);
-		tile.setDepth(10); // Set depth for proper rendering
+		tile.setDepth(10);
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;
@@ -67,7 +65,7 @@ export class TileFactory {
 	createBackgroundTile(x, y, row, col) {
 		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000);
 		tile.setStrokeStyle(2, 0x000000);
-		tile.setDepth(10); // Set depth for proper rendering
+		tile.setDepth(10);
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;

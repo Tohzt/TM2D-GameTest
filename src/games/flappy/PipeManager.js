@@ -14,7 +14,6 @@ export class PipeManager {
 			FLAPPY_CONFIG.PIPE_GAP_MAX
 		);
 
-		// Top pipe (green with darker border) - positioned above the gap
 		const topPipeY = gapPosition - gap / 2 - FLAPPY_CONFIG.PIPE_HEIGHT / 2;
 		const topPipe = this.scene.add.rectangle(
 			FLAPPY_CONFIG.PIPE_SPAWN_X,
@@ -35,7 +34,6 @@ export class PipeManager {
 			}
 		});
 
-		// Bottom pipe (green with darker border) - positioned below the gap
 		const bottomPipeY = gapPosition + gap / 2 + FLAPPY_CONFIG.PIPE_HEIGHT / 2;
 		const bottomPipe = this.scene.add.rectangle(
 			FLAPPY_CONFIG.PIPE_SPAWN_X,
@@ -61,18 +59,13 @@ export class PipeManager {
 		let scored = false;
 
 		this.pipes.children.entries.forEach((pipe) => {
-			// Check if bird has safely passed through the pipe gap (scoring)
-			// Add 30px offset so you only score when safely past the pipe
 			if (pipe.x < bird.x - 30 && !pipe.scored) {
 				pipe.scored = true;
-				// Only score once per pipe pair (check if this is the top pipe)
 				if (pipe.y < 300) {
-					// Top pipe is above center
 					scored = true;
 				}
 			}
 
-			// Remove pipes that are off screen
 			if (pipe.x < -100) {
 				pipe.destroy();
 			}
@@ -92,13 +85,10 @@ export class PipeManager {
 	}
 
 	destroy() {
-		// Stop the spawn timer
 		if (this.spawnTimer) {
 			this.spawnTimer.remove();
 		}
-		// Clear all pipes
 		this.pipes.clear(true, true);
-		// Remove the group
 		this.pipes.destroy();
 	}
 }

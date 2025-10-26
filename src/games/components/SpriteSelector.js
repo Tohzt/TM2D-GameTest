@@ -1,10 +1,9 @@
 export class SpriteSelector {
-	// Depth values for selection screen elements
 	static DEPTHS = {
-		SPRITE_BOX: 14, // Sprite selection boxes
-		SPRITE_IMAGE: 15, // Sprite preview images
-		BUTTON_BG: 19, // Button backgrounds
-		UI: 20, // UI text elements
+		SPRITE_BOX: 14,
+		SPRITE_IMAGE: 15,
+		BUTTON_BG: 19,
+		UI: 20,
 	};
 
 	constructor(scene, options = {}) {
@@ -12,7 +11,6 @@ export class SpriteSelector {
 		this.selectedSprite = null;
 		this.spriteSelected = false;
 
-		// Default configuration
 		this.config = {
 			sprites: options.sprites || ["Cherry_1", "Cherry_2"],
 			spriteSpacing: options.spriteSpacing || 180,
@@ -26,7 +24,6 @@ export class SpriteSelector {
 	}
 
 	showSelectionScreen(callback, backCallback) {
-		// Game name text (if provided)
 		if (this.config.gameName) {
 			this.scene.add
 				.text(200, 50, this.config.gameName, {
@@ -77,7 +74,6 @@ export class SpriteSelector {
 			backText.on("pointerdown", clickHandler);
 		}
 
-		// Available sprites
 		const sprites = this.config.sprites;
 		const spriteSpacing = this.config.spriteSpacing;
 		const startX = 200 - ((sprites.length - 1) * spriteSpacing) / 2;
@@ -86,7 +82,6 @@ export class SpriteSelector {
 			const x = startX + index * spriteSpacing;
 			const y = this.config.spriteY;
 
-			// Create bordered box for sprite
 			const box = this.scene.add.rectangle(
 				x,
 				y,
@@ -99,12 +94,10 @@ export class SpriteSelector {
 			box.setDepth(SpriteSelector.DEPTHS.SPRITE_BOX);
 			box.setInteractive();
 
-			// Create sprite preview
 			const sprite = this.scene.add.image(x, y, spriteKey);
 			sprite.setScale(1.0);
 			sprite.setDepth(SpriteSelector.DEPTHS.SPRITE_IMAGE);
 
-			// Add click handler
 			const clickHandler = () => {
 				this.selectSprite(spriteKey);
 				if (callback) {
@@ -115,7 +108,6 @@ export class SpriteSelector {
 			box.on("pointerdown", clickHandler);
 			sprite.on("pointerdown", clickHandler);
 
-			// Add hover effect
 			const hoverIn = () => {
 				sprite.setTint(0xcccccc);
 				box.setStrokeStyle(4, 0xffff00);
@@ -136,7 +128,6 @@ export class SpriteSelector {
 		this.selectedSprite = spriteKey;
 		this.spriteSelected = true;
 
-		// Clear all selection screen elements
 		this.clearSelectionScreen();
 	}
 

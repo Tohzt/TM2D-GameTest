@@ -13,21 +13,19 @@ export class UIManager {
 	}
 
 	createGameUI() {
-		// Create score text
 		this.scoreText = this.scene.add.text(16, 16, "Score: 0", {
-			fontSize: "32px",
+			fontSize: "28px",
 			fill: "#fff",
 			fontFamily: "Arial",
 		});
 		this.scoreText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
 
-		// Create high score text
 		this.highScoreText = this.scene.add.text(
 			384,
 			16,
 			`High: ${this.highScore}`,
 			{
-				fontSize: "24px",
+				fontSize: "28px",
 				fill: "#fff",
 				fontFamily: "Arial",
 			}
@@ -35,7 +33,6 @@ export class UIManager {
 		this.highScoreText.setOrigin(1, 0);
 		this.highScoreText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
 
-		// Start screen text
 		this.startText = this.scene.add
 			.text(200, 250, "Tap to Start!\nAvoid the pipes", {
 				fontSize: "24px",
@@ -78,7 +75,6 @@ export class UIManager {
 	}
 
 	showGameOver(score) {
-		// Clear any existing end game elements
 		this.clearEndGameUI();
 
 		const background = this.scene.add.rectangle(
@@ -116,7 +112,6 @@ export class UIManager {
 		scoreText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
 		this.endGameElements.push(scoreText);
 
-		// Retry button background (yellow)
 		const retryBg = this.scene.add.rectangle(140, 380, 100, 40, 0xffff00);
 		retryBg.setStrokeStyle(2, 0xffffff);
 		retryBg.setDepth(19);
@@ -134,7 +129,6 @@ export class UIManager {
 		retryText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
 		this.endGameElements.push(retryText);
 
-		// Quit button background (red)
 		const quitBg = this.scene.add.rectangle(260, 380, 100, 40, 0xff0000);
 		quitBg.setStrokeStyle(2, 0xffffff);
 		quitBg.setDepth(19);

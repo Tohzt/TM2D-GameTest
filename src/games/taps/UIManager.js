@@ -12,21 +12,19 @@ export class UIManager {
 	}
 
 	createGameUI() {
-		// Create score text
 		this.scoreText = this.scene.add.text(16, 16, "Score: 0", {
-			fontSize: "32px",
+			fontSize: "28px",
 			fill: "#fff",
 			fontFamily: "Arial",
 		});
 		this.scoreText.setDepth(TAPS_CONFIG.UI_DEPTH);
 
-		// Create high score text
 		this.highScoreText = this.scene.add.text(
 			384,
 			16,
 			`High: ${this.highScore}`,
 			{
-				fontSize: "24px",
+				fontSize: "28px",
 				fill: "#fff",
 				fontFamily: "Arial",
 			}
@@ -34,7 +32,6 @@ export class UIManager {
 		this.highScoreText.setOrigin(1, 0);
 		this.highScoreText.setDepth(TAPS_CONFIG.UI_DEPTH);
 
-		// Create timer text
 		this.timerText = this.scene.add.text(200, 16, "30.0s", {
 			fontSize: "24px",
 			fill: "#ff0000",
@@ -43,7 +40,6 @@ export class UIManager {
 		this.timerText.setOrigin(0.5, 0);
 		this.timerText.setDepth(TAPS_CONFIG.UI_DEPTH);
 
-		// Start screen text
 		this.startText = this.scene.add
 			.text(200, 250, "Tap to Start!\nClimb as high as you can!", {
 				fontSize: "20px",
@@ -80,7 +76,6 @@ export class UIManager {
 	}
 
 	showEndGame(title, titleColor, score) {
-		// Clear any existing end game elements
 		this.clearEndGameUI();
 
 		const background = this.scene.add.rectangle(
@@ -118,7 +113,6 @@ export class UIManager {
 		scoreText.setDepth(20);
 		this.endGameElements.push(scoreText);
 
-		// Retry button background (yellow)
 		const retryBg = this.scene.add.rectangle(140, 380, 100, 40, 0xffff00);
 		retryBg.setStrokeStyle(2, 0xffffff);
 		retryBg.setDepth(19);
@@ -136,7 +130,6 @@ export class UIManager {
 		retryText.setDepth(20);
 		this.endGameElements.push(retryText);
 
-		// Quit button background (red)
 		const quitBg = this.scene.add.rectangle(260, 380, 100, 40, 0xff0000);
 		quitBg.setStrokeStyle(2, 0xffffff);
 		quitBg.setDepth(19);

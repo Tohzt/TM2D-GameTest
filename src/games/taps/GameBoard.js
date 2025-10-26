@@ -24,13 +24,11 @@ export class GameBoard {
 		}
 		this.tiles = [];
 
-		// Clear ground if it exists
 		if (this.ground) {
 			this.ground.destroy();
 			this.ground = null;
 		}
 
-		// Create initial board with 5 visible rows
 		for (let row = 0; row < 5; row++) {
 			this.tiles[row] = [];
 			const y = TAPS_CONFIG.START_Y + row * TAPS_CONFIG.TILE_HEIGHT;
@@ -54,23 +52,20 @@ export class GameBoard {
 			}
 		}
 
-		// Create yellow ground rectangle at the bottom
 		this.createGround();
 	}
 
 	createGround() {
-		// Clear existing ground if it exists
 		if (this.ground) {
 			this.ground.destroy();
 		}
 
-		// Position ground at the bottom of the screen (600 tall, ground center at bottom - height/2)
-		const groundY = 600 - TAPS_CONFIG.TILE_HEIGHT / 2; // Center of ground at bottom edge
+		const groundY = 600 - TAPS_CONFIG.TILE_HEIGHT / 2;
 		this.ground = this.scene.add.rectangle(
 			200,
 			groundY,
 			TAPS_CONFIG.GROUND_WIDTH,
-			40, // Make it shorter
+			40,
 			TAPS_CONFIG.GROUND_COLOR
 		);
 		this.ground.setStrokeStyle(4, 0x000000);
@@ -78,7 +73,6 @@ export class GameBoard {
 	}
 
 	storeTargetPositions() {
-		// Store where each tile will be after scrolling
 		this.tiles.forEach((row) => {
 			row.forEach((tile) => {
 				if (tile && !tile.willDestroy) {
@@ -89,7 +83,6 @@ export class GameBoard {
 	}
 
 	scrollBoard() {
-		// Shift patterns down by copying data from row above
 		for (let rowIndex = 4; rowIndex >= 1; rowIndex--) {
 			const aboveRow = this.tiles[rowIndex - 1];
 			const currentRow = this.tiles[rowIndex];
@@ -98,22 +91,17 @@ export class GameBoard {
 				currentRow.forEach((tile, colIndex) => {
 					if (tile && aboveRow[colIndex]) {
 						const sourceTile = aboveRow[colIndex];
-						// Copy the state
 						tile.isCorrect = sourceTile.isCorrect;
 						tile.isActive = rowIndex === 4;
 
-						// Update visual appearance
 						if (sourceTile.type === "image" && tile.type === "image") {
-							// Both images, just change texture
 							tile.setTexture(sourceTile.texture.key);
 						} else if (
 							sourceTile.type === "rectangle" &&
 							tile.type === "rectangle"
 						) {
-							// Both rectangles, just change color
 							tile.setFillStyle(0xff0000);
 						} else {
-							// Different types, need to convert
 							const newTile = this.convertTileType(
 								tile,
 								sourceTile,
@@ -131,7 +119,6 @@ export class GameBoard {
 			}
 		}
 
-		// Generate new pattern for top row
 		const topRow = this.tiles[0];
 		const spriteCol = Phaser.Math.Between(0, TAPS_CONFIG.GRID_COLS - 1);
 
@@ -143,7 +130,6 @@ export class GameBoard {
 						tile.setTexture(this.tileFactory.selectedSprite);
 						tile.isCorrect = true;
 					} else {
-						// Convert to rectangle for preview
 						const newTile = this.convertImageToRect(tile, 0xff0000);
 						if (newTile) {
 							newTile.isCorrect = false;
@@ -152,9 +138,7 @@ export class GameBoard {
 						}
 					}
 				} else {
-					// Already a rectangle
 					if (isSprite) {
-						// Convert to sprite
 						const newTile = this.convertRectToImage(
 							tile,
 							this.tileFactory.selectedSprite
@@ -173,14 +157,12 @@ export class GameBoard {
 			}
 		});
 
-		// Keep ground at bottom
 		if (this.ground) {
 			this.ground.y = 600 - TAPS_CONFIG.TILE_HEIGHT / 2;
 		}
 	}
 
 	convertTileType(targetTile, sourceTile, isActive) {
-		// Destroy and recreate tile
 		const oldX = targetTile.x;
 		const oldY = targetTile.y;
 		targetTile.destroy();
@@ -225,7 +207,7 @@ export class GameBoard {
 	}
 
 	removeOffScreenTiles() {
-		let groundBottomY = 600; // Default to bottom of screen if ground is destroyed
+		let groundBottomY = 600;
 		if (this.ground) {
 			groundBottomY = this.ground.y + TAPS_CONFIG.TILE_HEIGHT;
 		}
@@ -244,7 +226,6 @@ export class GameBoard {
 		const newRow = [];
 		const spriteCol = Phaser.Math.Between(0, TAPS_CONFIG.GRID_COLS - 1);
 
-		// Always add at top position (row 0)
 		const targetY = TAPS_CONFIG.START_Y;
 		const startY = TAPS_CONFIG.START_Y - TAPS_CONFIG.TILE_HEIGHT;
 
@@ -261,9 +242,7 @@ export class GameBoard {
 				spriteCol,
 				false
 			);
-			// Position it directly - no animation since we're repositioning instantly
 			tile.y = targetY;
-			// Make tiles interactive so they can be clicked when they become the active row
 			if (!tile.input) {
 				tile.setInteractive({ useHandCursor: true });
 			}
@@ -272,7 +251,6 @@ export class GameBoard {
 
 		this.tiles.unshift(newRow);
 
-		// Update row indices
 		this.tiles.forEach((row, rowIndex) => {
 			row.forEach((tile) => {
 				if (tile) {
@@ -281,14 +259,12 @@ export class GameBoard {
 			});
 		});
 
-		// Re-enable interactions for the NEW active row
 		this.scene.time.delayedCall(50, () => {
 			this.activateBottomRow();
 		});
 	}
 
 	activateBottomRow() {
-		// Find the bottommost row with unclicked tiles
 		let activeRowIndex = -1;
 		for (let i = this.tiles.length - 1; i >= 0; i--) {
 			const row = this.tiles[i];

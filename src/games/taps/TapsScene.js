@@ -10,14 +10,12 @@ export class TapsScene extends Phaser.Scene {
 	}
 
 	preload() {
-		// Load all sprite images from the stickers directory
 		TAPS_CONFIG.SPRITES.forEach((sprite) => {
 			this.load.image(sprite, `/assets/stickers/${sprite}.png`);
 		});
 	}
 
 	create() {
-		// Initialize managers
 		this.spriteSelector = new SpriteSelector(this, {
 			sprites: TAPS_CONFIG.SPRITES,
 			spriteSpacing: TAPS_CONFIG.SPRITE_SPACING,
@@ -28,19 +26,15 @@ export class TapsScene extends Phaser.Scene {
 		});
 		this.uiManager = new UIManager(this);
 
-		// Show sprite selection screen
 		this.spriteSelector.showSelectionScreen(
 			(spriteKey) => {
 				this.selectedSprite = spriteKey;
 				this.initializeGame();
 			},
 			() => {
-				// Back button - return to menu
 				this.scene.start("MenuScene");
 			}
 		);
-
-		// Game state
 		this.score = 0;
 		this.gameOver = false;
 		this.gameStarted = false;
@@ -51,10 +45,8 @@ export class TapsScene extends Phaser.Scene {
 	}
 
 	initializeGame() {
-		// Create UI
 		this.uiManager.createGameUI();
 
-		// Set up input handling
 		this.input.on("pointerdown", this.startOrPlay, this);
 	}
 
@@ -63,7 +55,6 @@ export class TapsScene extends Phaser.Scene {
 			return;
 		}
 
-		// Update timer
 		if (!this.gameOver) {
 			this.timer -= delta / 1000;
 			if (this.timer <= 0) {
@@ -88,17 +79,14 @@ export class TapsScene extends Phaser.Scene {
 		this.gameStarted = true;
 		this.timer = TAPS_CONFIG.TIMER_DURATION;
 
-		// Hide the start text
 		this.uiManager.hideStartText();
 
-		// Create game board
 		this.gameBoard = new GameBoard(this, this.selectedSprite);
 		this.gameBoard.createBoard();
 		this.setupTileInteractions();
 	}
 
 	setupTileInteractions() {
-		// Find the bottommost row with unclicked tiles
 		let activeRowIndex = -1;
 		for (let i = this.gameBoard.tiles.length - 1; i >= 0; i--) {
 			const row = this.gameBoard.tiles[i];
@@ -107,8 +95,6 @@ export class TapsScene extends Phaser.Scene {
 				break;
 			}
 		}
-
-		// Set up click handlers for the active row
 		if (activeRowIndex >= 0 && this.gameBoard.tiles[activeRowIndex]) {
 			this.gameBoard.tiles[activeRowIndex].forEach((tile) => {
 				if (tile && tile.alpha >= 0.8) {
@@ -130,7 +116,6 @@ export class TapsScene extends Phaser.Scene {
 			return;
 		}
 
-		// Find which row this tile is in
 		let clickedRowIndex = -1;
 		for (let i = 0; i < this.gameBoard.tiles.length; i++) {
 			if (this.gameBoard.tiles[i].includes(tile)) {
@@ -139,11 +124,8 @@ export class TapsScene extends Phaser.Scene {
 			}
 		}
 
-		// Update score
 		this.score += 1;
 		this.uiManager.updateScore(this.score);
-
-		// Flash the tile
 		tile.setTint(TAPS_CONFIG.CORRECT_COLOR);
 		this.time.delayedCall(100, () => {
 			if (tile && tile.active) {
@@ -151,13 +133,9 @@ export class TapsScene extends Phaser.Scene {
 			}
 		});
 
-		// Show score increase
 		this.uiManager.showScoreIncrease(tile.x, tile.y);
 
-		// Just scroll the pattern down - don't delete the row
 		this.gameBoard.scrollBoard();
-
-		// Set up click handlers for the bottom row (always index 4)
 		const bottomRowIndex = 4;
 		if (this.gameBoard.tiles[bottomRowIndex]) {
 			this.gameBoard.tiles[bottomRowIndex].forEach((tile) => {
@@ -182,7 +160,6 @@ export class TapsScene extends Phaser.Scene {
 		if (row && row.length > 0) {
 			row.forEach((tile) => {
 				if (tile && tile.active) {
-					// Ensure the tile can be made interactive
 					if (!tile.input) {
 						tile.setInteractive();
 					}
@@ -190,12 +167,6 @@ export class TapsScene extends Phaser.Scene {
 					tile.isActive = true;
 					tile.removeAllListeners();
 
-					// Change losing tiles to green to show they're in the active row
-					if (!tile.isCorrect && tile.setFillStyle) {
-						tile.setFillStyle(0x00ff00);
-					}
-
-					// Add click handlers
 					if (tile.isCorrect) {
 						tile.on("pointerdown", () => this.tapTile(tile));
 					} else {
@@ -251,30 +222,22 @@ export class TapsScene extends Phaser.Scene {
 	}
 
 	restartGame() {
-		// Clean up end game UI
 		this.uiManager.clearEndGameUI();
 
-		// Destroy board first
 		if (this.gameBoard) {
 			this.gameBoard.destroy();
 			this.gameBoard = null;
 		}
 
-		// Clean up previous game state
 		this.gameOver = false;
 		this.gameStarted = false;
 		this.score = 0;
 		this.timer = TAPS_CONFIG.TIMER_DURATION;
 		this.uiManager.resetScore();
-
-		// Reset UI
 		this.uiManager.hideStartText();
 
-		// Create a completely fresh board
 		this.gameBoard = new GameBoard(this, this.selectedSprite);
 		this.gameBoard.createBoard();
-
-		// Re-enable input
 		this.gameStarted = true;
 
 		this.setupTileInteractions();

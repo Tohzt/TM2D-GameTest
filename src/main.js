@@ -4,19 +4,10 @@ import FlappyScene from "./games/flappy/index.js";
 import TapsScene from "./games/taps/index.js";
 import WebApp from "@twa-dev/sdk";
 
-// Initialize Telegram WebApp
 WebApp.ready();
-
-// Expand to fullscreen (removes header)
 WebApp.expand();
-
-// Optional: Make the header background match your game
-WebApp.setHeaderColor("#1a237e"); // matches menu background
-
-// Optional: Enable closing confirmation
+WebApp.setHeaderColor("#1a237e");
 WebApp.enableClosingConfirmation();
-
-// Create Phaser game
 const game = new Phaser.Game({
 	type: Phaser.AUTO,
 	scale: {
@@ -36,6 +27,3 @@ const game = new Phaser.Game({
 	},
 	scene: [MenuScene, FlappyScene, TapsScene],
 });
-
-// Optional: Log if running in Telegram
-console.log("Running in Telegram:", WebApp.platform !== "unknown");

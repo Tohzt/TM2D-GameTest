@@ -6,10 +6,8 @@ class MenuScene extends Phaser.Scene {
 	}
 
 	create() {
-		// Background
 		this.add.rectangle(200, 300, 400, 600, 0x1a237e);
 
-		// Title
 		this.add
 			.text(200, 120, "TM2D Games", {
 				fontSize: "48px",
@@ -19,7 +17,6 @@ class MenuScene extends Phaser.Scene {
 			})
 			.setOrigin(0.5);
 
-		// Subtitle
 		this.add
 			.text(200, 180, "Choose a Game", {
 				fontSize: "24px",
@@ -28,7 +25,6 @@ class MenuScene extends Phaser.Scene {
 			})
 			.setOrigin(0.5);
 
-		// Available games
 		const games = [
 			{
 				name: "Flappy Bird",
@@ -44,7 +40,6 @@ class MenuScene extends Phaser.Scene {
 			},
 		];
 
-		// Create scrollable container mask
 		const containerHeight = 400;
 		const containerY = 220;
 		const mask = this.add.rectangle(
@@ -57,15 +52,14 @@ class MenuScene extends Phaser.Scene {
 		);
 		mask.setOrigin(0.5);
 
-		const gameSpacing = 140; // Reduced from 200
-		const startY = 250; // Start closer to title
-		const cardWidth = 360; // Slightly wider to use more of the screen
-		const cardHeight = 100; // Slightly shorter
+		const gameSpacing = 140;
+		const startY = 250;
+		const cardWidth = 360;
+		const cardHeight = 100;
 
 		games.forEach((game, index) => {
 			const y = startY + index * gameSpacing;
 
-			// Create game card
 			const card = this.add.rectangle(
 				200,
 				y,
@@ -76,7 +70,6 @@ class MenuScene extends Phaser.Scene {
 			card.setStrokeStyle(4, 0xffffff);
 			card.setInteractive({ useHandCursor: true });
 
-			// Game name
 			this.add
 				.text(200, y - 15, game.name, {
 					fontSize: "28px",
@@ -87,7 +80,6 @@ class MenuScene extends Phaser.Scene {
 				})
 				.setOrigin(0.5);
 
-			// Game description
 			this.add
 				.text(200, y + 15, game.description, {
 					fontSize: "14px",
@@ -96,7 +88,6 @@ class MenuScene extends Phaser.Scene {
 				})
 				.setOrigin(0.5);
 
-			// Hover effect
 			card.on("pointerover", () => {
 				card.setFillStyle(game.color, 0.7);
 				card.setStrokeStyle(4, 0xffff00);
@@ -107,7 +98,6 @@ class MenuScene extends Phaser.Scene {
 				card.setStrokeStyle(4, 0xffffff);
 			});
 
-			// Click handler
 			card.on("pointerdown", () => {
 				this.startGame(game.key);
 			});
@@ -115,7 +105,6 @@ class MenuScene extends Phaser.Scene {
 	}
 
 	startGame(gameKey) {
-		// Start the selected game scene
 		if (gameKey === "flappy") {
 			this.scene.start("FlappyScene");
 		} else if (gameKey === "taps") {
