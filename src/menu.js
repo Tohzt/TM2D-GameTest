@@ -9,7 +9,7 @@ class MenuScene extends Phaser.Scene {
 		this.add.rectangle(200, 300, 400, 600, 0x1a237e);
 
 		this.add
-			.text(200, 120, "TM2D Games", {
+			.text(200, 60, "TM2D Games", {
 				fontSize: "48px",
 				fill: "#fff",
 				fontFamily: "Arial",
@@ -18,7 +18,7 @@ class MenuScene extends Phaser.Scene {
 			.setOrigin(0.5);
 
 		this.add
-			.text(200, 180, "Choose a Game", {
+			.text(200, 120, "Choose a Game", {
 				fontSize: "24px",
 				fill: "#bbb",
 				fontFamily: "Arial",
@@ -44,24 +44,23 @@ class MenuScene extends Phaser.Scene {
 				description: "Jump over obstacles!",
 				color: 0xff6600,
 			},
+			{
+				name: "Catch Game",
+				key: "catch",
+				description: "Catch falling sprites!",
+				color: 0x9b59b6,
+			},
 		];
 
-		const containerHeight = 400;
-		const containerY = 220;
-		const mask = this.add.rectangle(
-			200,
-			containerY,
-			380,
-			containerHeight,
-			0x000000,
-			0
-		);
-		mask.setOrigin(0.5);
+		// Create simple game list
+		this.createGamesList(games);
+	}
 
-		const gameSpacing = 140;
-		const startY = 250;
+	createGamesList(games) {
+		const startY = 180;
+		const gameSpacing = 85;
 		const cardWidth = 360;
-		const cardHeight = 100;
+		const cardHeight = 75;
 
 		games.forEach((game, index) => {
 			const y = startY + index * gameSpacing;
@@ -77,18 +76,17 @@ class MenuScene extends Phaser.Scene {
 			card.setInteractive({ useHandCursor: true });
 
 			this.add
-				.text(200, y - 15, game.name, {
-					fontSize: "28px",
+				.text(200, y - 12, game.name, {
+					fontSize: "26px",
 					fill: "#fff",
 					fontFamily: "Arial",
 					fontStyle: "bold",
-					wordWrap: { width: cardWidth - 40 },
 				})
 				.setOrigin(0.5);
 
 			this.add
-				.text(200, y + 15, game.description, {
-					fontSize: "14px",
+				.text(200, y + 12, game.description, {
+					fontSize: "13px",
 					fill: "#fff",
 					fontFamily: "Arial",
 				})
@@ -117,6 +115,8 @@ class MenuScene extends Phaser.Scene {
 			this.scene.start("TapsScene");
 		} else if (gameKey === "dino") {
 			this.scene.start("DinoScene");
+		} else if (gameKey === "catch") {
+			this.scene.start("CatchScene");
 		}
 	}
 }
