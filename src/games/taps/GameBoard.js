@@ -57,40 +57,51 @@ export class GameBoard {
 		this.ground.setDepth(TAPS_CONFIG.GROUND_DEPTH);
 	}
 
-	scrollBoard() {
-		// Move all tiles DOWN by one row
+	storeTargetPositions() {
+		// Store where each tile will be after scrolling
 		this.tiles.forEach((row) => {
 			row.forEach((tile) => {
 				if (tile && !tile.willDestroy) {
-					this.scene.tweens.add({
-						targets: tile,
-						y: tile.y + TAPS_CONFIG.TILE_HEIGHT,
-						duration: 100,
-						ease: "Linear",
-					});
+					tile.targetY = tile.y + TAPS_CONFIG.TILE_HEIGHT;
+				}
+			});
+		});
+	}
+
+	scrollBoard() {
+		// Remove tiles that have gone off screen
+		this.removeOffScreenTiles();
+
+		// Add a new row at the top
+		this.addNewRow();
+
+		// Reposition all tiles to keep active row at same screen position
+		this.tiles.forEach((row, rowIndex) => {
+			const targetY = TAPS_CONFIG.START_Y + rowIndex * TAPS_CONFIG.TILE_HEIGHT;
+			row.forEach((tile) => {
+				if (tile && !tile.willDestroy) {
+					tile.y = targetY;
 				}
 			});
 		});
 
-		// Also scroll the yellow ground down
+		// Move ground down by one tile height, eventually scrolling it off screen
 		if (this.ground) {
-			this.scene.tweens.add({
-				targets: this.ground,
-				y: this.ground.y + TAPS_CONFIG.TILE_HEIGHT,
-				duration: 100,
-				ease: "Linear",
-			});
+			this.ground.y = this.ground.y + TAPS_CONFIG.TILE_HEIGHT;
 		}
 
-		// Remove tiles that have gone off screen
-		this.scene.time.delayedCall(100, () => {
-			this.removeOffScreenTiles();
-			this.addNewRow();
-		});
+		// If ground has moved too far down, remove it so it doesn't block the view
+		if (this.ground && this.ground.y > 650) {
+			this.ground.destroy();
+			this.ground = null;
+		}
 	}
 
 	removeOffScreenTiles() {
-		const groundBottomY = this.ground.y + TAPS_CONFIG.TILE_HEIGHT;
+		let groundBottomY = 600; // Default to bottom of screen if ground is destroyed
+		if (this.ground) {
+			groundBottomY = this.ground.y + TAPS_CONFIG.TILE_HEIGHT;
+		}
 
 		this.tiles = this.tiles.filter((row) => {
 			if (row.length > 0 && row[0] && row[0].y < groundBottomY + 50) {
@@ -104,22 +115,27 @@ export class GameBoard {
 
 	addNewRow() {
 		const newRow = [];
-		const y = TAPS_CONFIG.START_Y;
 		const spriteCol = Phaser.Math.Between(0, TAPS_CONFIG.GRID_COLS - 1);
+
+		// Always add at top position (row 0)
+		const targetY = TAPS_CONFIG.START_Y;
+		const startY = TAPS_CONFIG.START_Y - TAPS_CONFIG.TILE_HEIGHT;
 
 		for (let col = 0; col < TAPS_CONFIG.GRID_COLS; col++) {
 			const x =
 				200 -
 				((TAPS_CONFIG.GRID_COLS - 1) * TAPS_CONFIG.TILE_WIDTH) / 2 +
 				col * TAPS_CONFIG.TILE_WIDTH;
-			const tile = this.tileFactory.createTile(x, y, 0, col, spriteCol, false);
-			tile.y = y - TAPS_CONFIG.TILE_HEIGHT;
-			this.scene.tweens.add({
-				targets: tile,
-				y: y,
-				duration: 100,
-				ease: "Linear",
-			});
+			const tile = this.tileFactory.createTile(
+				x,
+				targetY,
+				0,
+				col,
+				spriteCol,
+				false
+			);
+			// Position it directly - no animation since we're repositioning instantly
+			tile.y = targetY;
 			newRow.push(tile);
 		}
 

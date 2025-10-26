@@ -34,6 +34,7 @@ export class TapsScene extends Phaser.Scene {
 		this.timer = TAPS_CONFIG.TIMER_DURATION;
 		this.gameBoard = null;
 		this.selectedSprite = null;
+		this.isScrolling = false;
 	}
 
 	initializeGame() {
@@ -162,14 +163,43 @@ export class TapsScene extends Phaser.Scene {
 			}
 		});
 
+		// Store target positions before scrolling
+		this.gameBoard.storeTargetPositions();
+
 		// Scroll the board
 		this.gameBoard.scrollBoard();
 
-		// Re-setup interactions for the new active row
-		// Wait for scroll animation to complete (100ms) + new row animation (100ms) + buffer
+		// Immediately set up interactions for the NEW active row (one row up from clicked)
+		// This is the row that will become the bottom active row after scrolling
+		const newActiveRowIndex = clickedRowIndex - 1;
+		if (newActiveRowIndex >= 0 && this.gameBoard.tiles[newActiveRowIndex]) {
+			this.setupRowInteractions(newActiveRowIndex);
+		}
+
+		// Also set up after scroll completes for safety
 		this.time.delayedCall(200, () => {
 			this.setupTileInteractions();
 		});
+	}
+
+	setupRowInteractions(rowIndex) {
+		if (rowIndex < 0 || rowIndex >= this.gameBoard.tiles.length) return;
+
+		const row = this.gameBoard.tiles[rowIndex];
+		if (row && row.length > 0) {
+			row.forEach((tile) => {
+				if (tile && tile.alpha >= 0.8) {
+					tile.isActive = true;
+					tile.removeAllListeners();
+					if (tile.isCorrect) {
+						tile.on("pointerdown", () => this.tapTile(tile));
+					} else {
+						tile.on("pointerdown", () => this.hitLosingTile());
+					}
+					tile.setInteractive({ useHandCursor: true });
+				}
+			});
+		}
 	}
 
 	hitLosingTile() {
