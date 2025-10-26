@@ -1,8 +1,8 @@
 import Phaser from "phaser";
 
-class GameScene extends Phaser.Scene {
+class FlappyScene extends Phaser.Scene {
 	constructor() {
-		super({ key: "GameScene" });
+		super({ key: "FlappyScene" });
 	}
 
 	preload() {
@@ -89,7 +89,7 @@ class GameScene extends Phaser.Scene {
 
 	startOrFlap() {
 		if (this.gameOver) {
-			this.restartGame();
+			// Don't handle restart here anymore, let the buttons handle it
 			return;
 		}
 
@@ -170,7 +170,7 @@ class GameScene extends Phaser.Scene {
 
 		// Game over text
 		const gameOverText = this.add
-			.text(200, 250, "Game Over!\nTap to Restart", {
+			.text(200, 220, "Game Over!", {
 				fontSize: "32px",
 				fill: "#fff",
 				fontFamily: "Arial",
@@ -178,6 +178,36 @@ class GameScene extends Phaser.Scene {
 			})
 			.setOrigin(0.5);
 		gameOverText.setDepth(20); // Put game over text on top
+
+		// Restart button
+		const restartText = this.add
+			.text(200, 280, "Tap to Restart", {
+				fontSize: "24px",
+				fill: "#ffff00",
+				fontFamily: "Arial",
+			})
+			.setOrigin(0.5)
+			.setInteractive({ useHandCursor: true });
+		restartText.setDepth(20);
+
+		restartText.on("pointerdown", () => {
+			this.restartGame();
+		});
+
+		// Menu button
+		const menuText = this.add
+			.text(200, 340, "Menu", {
+				fontSize: "24px",
+				fill: "#4ec0ca",
+				fontFamily: "Arial",
+			})
+			.setOrigin(0.5)
+			.setInteractive({ useHandCursor: true });
+		menuText.setDepth(20);
+
+		menuText.on("pointerdown", () => {
+			this.scene.start("MenuScene");
+		});
 	}
 
 	restartGame() {
@@ -316,25 +346,4 @@ class GameScene extends Phaser.Scene {
 	}
 }
 
-// Game configuration
-const config = {
-	type: Phaser.AUTO,
-	scale: {
-		mode: Phaser.Scale.FIT,
-		autoCenter: Phaser.Scale.CENTER_BOTH,
-		width: 400,
-		height: 600,
-	},
-	parent: "game-container",
-	backgroundColor: "#4ec0ca",
-	physics: {
-		default: "arcade",
-		arcade: {
-			gravity: { y: 0 }, // Start with no gravity
-			debug: false,
-		},
-	},
-	scene: GameScene,
-};
-
-export default config;
+export default FlappyScene;
