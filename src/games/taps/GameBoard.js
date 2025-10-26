@@ -7,6 +7,7 @@ export class GameBoard {
 		this.tileFactory = new TileFactory(scene, selectedSprite);
 		this.tiles = [];
 		this.ground = null;
+		this.isScrolling = false;
 	}
 
 	createBoard() {
@@ -69,6 +70,13 @@ export class GameBoard {
 	}
 
 	scrollBoard() {
+		// Prevent concurrent scroll operations
+		if (this.isScrolling) {
+			return;
+		}
+
+		this.isScrolling = true;
+
 		// Remove tiles that have gone off screen
 		this.removeOffScreenTiles();
 
@@ -95,6 +103,11 @@ export class GameBoard {
 			this.ground.destroy();
 			this.ground = null;
 		}
+
+		// Re-enable scrolling after a brief delay to allow tile repositioning to complete
+		this.scene.time.delayedCall(50, () => {
+			this.isScrolling = false;
+		});
 	}
 
 	removeOffScreenTiles() {
