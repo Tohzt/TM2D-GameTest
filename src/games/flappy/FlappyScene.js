@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { FLAPPY_CONFIG } from "./config.js";
-import { SpriteSelector } from "./SpriteSelector.js";
+import { SpriteSelector } from "../components/SpriteSelector.js";
 import { UIManager } from "./UIManager.js";
 import { PipeManager } from "./PipeManager.js";
 
@@ -18,7 +18,13 @@ export class FlappyScene extends Phaser.Scene {
 
 	create() {
 		// Initialize managers
-		this.spriteSelector = new SpriteSelector(this);
+		this.spriteSelector = new SpriteSelector(this, {
+			sprites: FLAPPY_CONFIG.SPRITES,
+			spriteSpacing: FLAPPY_CONFIG.SPRITE_SPACING,
+			spriteBoxSize: FLAPPY_CONFIG.SPRITE_BOX_SIZE,
+			titleY: 100,
+			spriteY: 250,
+		});
 		this.uiManager = new UIManager(this);
 		this.pipeManager = new PipeManager(this);
 

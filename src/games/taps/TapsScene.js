@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { TAPS_CONFIG } from "./config.js";
 import { GameBoard } from "./GameBoard.js";
-import { SpriteSelector } from "./SpriteSelector.js";
+import { SpriteSelector } from "../components/SpriteSelector.js";
 import { UIManager } from "./UIManager.js";
 
 export class TapsScene extends Phaser.Scene {
@@ -18,7 +18,13 @@ export class TapsScene extends Phaser.Scene {
 
 	create() {
 		// Initialize managers
-		this.spriteSelector = new SpriteSelector(this);
+		this.spriteSelector = new SpriteSelector(this, {
+			sprites: TAPS_CONFIG.SPRITES,
+			spriteSpacing: TAPS_CONFIG.SPRITE_SPACING,
+			spriteBoxSize: 140,
+			titleY: 120,
+			spriteY: 300,
+		});
 		this.uiManager = new UIManager(this);
 
 		// Show sprite selection screen

@@ -1,16 +1,27 @@
-import { FLAPPY_CONFIG } from "./config.js";
-
 export class SpriteSelector {
-	constructor(scene) {
+	constructor(scene, options = {}) {
 		this.scene = scene;
 		this.selectedSprite = null;
+		this.spriteSelected = false;
+
+		// Default configuration
+		this.config = {
+			sprites: options.sprites || ["Cherry_1", "Cherry_2"],
+			spriteSpacing: options.spriteSpacing || 180,
+			spriteBoxSize: options.spriteBoxSize || 140,
+			titleY: options.titleY || 100,
+			title: options.title || "Choose Your Character!",
+			spriteY: options.spriteY || 300,
+			titleSize: options.titleSize || "28px",
+			...options,
+		};
 	}
 
-	showSelectionScreen(onSelect) {
+	showSelectionScreen(callback) {
 		// Title text
 		this.scene.add
-			.text(200, 100, "Choose Your Character!", {
-				fontSize: "28px",
+			.text(200, this.config.titleY, this.config.title, {
+				fontSize: this.config.titleSize,
 				fill: "#fff",
 				fontFamily: "Arial",
 				align: "center",
@@ -19,20 +30,20 @@ export class SpriteSelector {
 			.setDepth(20);
 
 		// Available sprites
-		const sprites = FLAPPY_CONFIG.SPRITES;
-		const spriteSpacing = FLAPPY_CONFIG.SPRITE_SPACING;
+		const sprites = this.config.sprites;
+		const spriteSpacing = this.config.spriteSpacing;
 		const startX = 200 - ((sprites.length - 1) * spriteSpacing) / 2;
 
 		sprites.forEach((spriteKey, index) => {
 			const x = startX + index * spriteSpacing;
-			const y = 250;
+			const y = this.config.spriteY;
 
 			// Create bordered box for sprite
 			const box = this.scene.add.rectangle(
 				x,
 				y,
-				FLAPPY_CONFIG.SPRITE_BOX_SIZE,
-				FLAPPY_CONFIG.SPRITE_BOX_SIZE,
+				this.config.spriteBoxSize,
+				this.config.spriteBoxSize,
 				0x000000,
 				0.3
 			);
@@ -45,11 +56,11 @@ export class SpriteSelector {
 			sprite.setScale(1.0);
 			sprite.setDepth(15);
 
-			// Add click handler to both box and sprite
+			// Add click handler
 			const clickHandler = () => {
-				this.selectedSprite = spriteKey;
-				if (onSelect) {
-					onSelect(spriteKey);
+				this.selectSprite(spriteKey);
+				if (callback) {
+					callback(spriteKey);
 				}
 			};
 
@@ -59,11 +70,11 @@ export class SpriteSelector {
 			// Add hover effect
 			const hoverIn = () => {
 				sprite.setTint(0xcccccc);
-				box.setStrokeStyle(4, 0xffff00); // Yellow border on hover
+				box.setStrokeStyle(4, 0xffff00);
 			};
 			const hoverOut = () => {
 				sprite.clearTint();
-				box.setStrokeStyle(4, 0xffffff); // White border normal
+				box.setStrokeStyle(4, 0xffffff);
 			};
 
 			box.on("pointerover", hoverIn);
@@ -73,12 +84,23 @@ export class SpriteSelector {
 		});
 	}
 
+	selectSprite(spriteKey) {
+		this.selectedSprite = spriteKey;
+		this.spriteSelected = true;
+
+		// Clear all selection screen elements
+		this.clearSelectionScreen();
+	}
+
 	clearSelectionScreen() {
-		// Clear selection screen elements
 		this.scene.children.list.slice().forEach((child) => {
 			if (child.depth === 14 || child.depth === 15 || child.depth === 20) {
 				child.destroy();
 			}
 		});
+	}
+
+	getSelectedSprite() {
+		return this.selectedSprite;
 	}
 }
