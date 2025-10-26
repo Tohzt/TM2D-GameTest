@@ -4,6 +4,7 @@ export class PipeManager {
 	constructor(scene) {
 		this.scene = scene;
 		this.pipes = this.scene.physics.add.group();
+		this.spawnTimer = null;
 	}
 
 	spawnPipes() {
@@ -81,7 +82,7 @@ export class PipeManager {
 	}
 
 	startSpawning(scene) {
-		scene.time.addEvent({
+		this.spawnTimer = scene.time.addEvent({
 			delay: FLAPPY_CONFIG.PIPE_SPAWN_DELAY,
 			callback: () => {
 				this.spawnPipes();
@@ -91,6 +92,13 @@ export class PipeManager {
 	}
 
 	destroy() {
+		// Stop the spawn timer
+		if (this.spawnTimer) {
+			this.spawnTimer.remove();
+		}
+		// Clear all pipes
 		this.pipes.clear(true, true);
+		// Remove the group
+		this.pipes.destroy();
 	}
 }

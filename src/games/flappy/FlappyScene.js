@@ -96,14 +96,14 @@ export class FlappyScene extends Phaser.Scene {
 		this.input.on("pointerdown", this.startOrFlap, this);
 
 		// Check collisions using the collision circle
-		this.physics.add.collider(
+		this.groundCollider = this.physics.add.collider(
 			this.birdCollision,
 			this.ground,
 			this.hitObstacle,
 			null,
 			this
 		);
-		this.physics.add.overlap(
+		this.pipeCollider = this.physics.add.overlap(
 			this.birdCollision,
 			this.pipeManager.pipes,
 			this.hitObstacle,
@@ -180,40 +180,62 @@ export class FlappyScene extends Phaser.Scene {
 		this.physics.pause();
 		this.bird.setTint(0xff0000); // Red tint for game over effect
 
-		// Game over text
-		const gameOverText = this.add
-			.text(200, 220, "Game Over!", {
-				fontSize: "32px",
-				fill: "#fff",
-				fontFamily: "Arial",
-				align: "center",
-			})
-			.setOrigin(0.5);
-		gameOverText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
-
-		const { retryText, menuText } = this.uiManager.showGameOver();
+		const { retryText, quitText } = this.uiManager.showGameOver(this.score);
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
 		});
 
-		menuText.on("pointerdown", () => {
+		quitText.on("pointerdown", () => {
 			this.scene.start("MenuScene");
 		});
 	}
 
 	restartGame() {
+		// Clean up end game UI
+		this.uiManager.clearEndGameUI();
+
+		// Reset game state
 		this.gameOver = false;
 		this.gameStarted = false;
 		this.score = 0;
 		this.uiManager.resetScore();
 
-		// Destroy board and pipes
+		// Reset bird visual and physics
+		this.bird.clearTint();
+		this.bird.x = FLAPPY_CONFIG.BIRD_START_X;
+		this.bird.y = FLAPPY_CONFIG.BIRD_START_Y;
+		this.bird.angle = 0;
+
+		this.birdCollision.x = FLAPPY_CONFIG.BIRD_START_X;
+		this.birdCollision.y = FLAPPY_CONFIG.BIRD_START_Y;
+		this.birdCollision.body.setVelocity(0, 0);
+		this.birdCollision.body.setGravityY(0);
+
+		// Remove old colliders
+		if (this.pipeCollider) {
+			this.pipeCollider.destroy();
+		}
+
+		// Stop pipe spawning and clean up
 		if (this.pipeManager) {
 			this.pipeManager.destroy();
 		}
 
-		this.scene.restart();
+		// Create new pipe manager
+		this.pipeManager = new PipeManager(this);
+
+		// Re-add pipe collision
+		this.pipeCollider = this.physics.add.overlap(
+			this.birdCollision,
+			this.pipeManager.pipes,
+			this.hitObstacle,
+			null,
+			this
+		);
+
+		// Resume physics
+		this.physics.resume();
 	}
 }
 

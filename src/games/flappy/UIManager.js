@@ -9,6 +9,7 @@ export class UIManager {
 		this.highScore = parseInt(
 			localStorage.getItem("flappyBirdHighScore") || "0"
 		);
+		this.endGameElements = [];
 	}
 
 	createGameUI() {
@@ -76,27 +77,90 @@ export class UIManager {
 		}
 	}
 
-	showGameOver() {
-		const retryText = this.scene.add
-			.text(200, 280, "Tap to Restart", {
+	showGameOver(score) {
+		// Clear any existing end game elements
+		this.clearEndGameUI();
+
+		const background = this.scene.add.rectangle(
+			200,
+			300,
+			350,
+			280,
+			0x000000,
+			0.8
+		);
+		background.setStrokeStyle(4, 0xffffff);
+		background.setDepth(18);
+		background.setInteractive();
+		this.endGameElements.push(background);
+
+		const titleText = this.scene.add
+			.text(200, 230, "Game Over!", {
+				fontSize: "32px",
+				fill: "#fff",
+				fontFamily: "Arial",
+				align: "center",
+			})
+			.setOrigin(0.5);
+		titleText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
+		this.endGameElements.push(titleText);
+
+		const scoreText = this.scene.add
+			.text(200, 270, `Score: ${score}`, {
 				fontSize: "24px",
-				fill: "#ffff00",
+				fill: "#fff",
+				fontFamily: "Arial",
+				align: "center",
+			})
+			.setOrigin(0.5);
+		scoreText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
+		this.endGameElements.push(scoreText);
+
+		// Retry button background (yellow)
+		const retryBg = this.scene.add.rectangle(140, 380, 100, 40, 0xffff00);
+		retryBg.setStrokeStyle(2, 0xffffff);
+		retryBg.setDepth(19);
+		retryBg.setInteractive({ useHandCursor: true });
+		this.endGameElements.push(retryBg);
+
+		const retryText = this.scene.add
+			.text(140, 380, "Retry", {
+				fontSize: "24px",
+				fill: "#000000",
 				fontFamily: "Arial",
 			})
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true });
 		retryText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
+		this.endGameElements.push(retryText);
 
-		const menuText = this.scene.add
-			.text(200, 340, "Menu", {
+		// Quit button background (red)
+		const quitBg = this.scene.add.rectangle(260, 380, 100, 40, 0xff0000);
+		quitBg.setStrokeStyle(2, 0xffffff);
+		quitBg.setDepth(19);
+		quitBg.setInteractive({ useHandCursor: true });
+		this.endGameElements.push(quitBg);
+
+		const quitText = this.scene.add
+			.text(260, 380, "Quit", {
 				fontSize: "24px",
-				fill: "#4ec0ca",
+				fill: "#fff",
 				fontFamily: "Arial",
 			})
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true });
-		menuText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
+		quitText.setDepth(FLAPPY_CONFIG.UI_DEPTH);
+		this.endGameElements.push(quitText);
 
-		return { retryText, menuText };
+		return { retryText, quitText };
+	}
+
+	clearEndGameUI() {
+		this.endGameElements.forEach((element) => {
+			if (element && element.destroy) {
+				element.destroy();
+			}
+		});
+		this.endGameElements = [];
 	}
 }
