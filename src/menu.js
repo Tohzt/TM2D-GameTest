@@ -38,6 +38,12 @@ class MenuScene extends Phaser.Scene {
 				description: "Tap the sprites, avoid red!",
 				color: 0x00ff00,
 			},
+			{
+				name: "Dino Runner",
+				key: "dino",
+				description: "Jump over obstacles!",
+				color: 0xff6600,
+			},
 		];
 
 		const containerHeight = 400;
@@ -109,6 +115,8 @@ class MenuScene extends Phaser.Scene {
 			this.scene.start("FlappyScene");
 		} else if (gameKey === "taps") {
 			this.scene.start("TapsScene");
+		} else if (gameKey === "dino") {
+			this.scene.start("DinoScene");
 		}
 	}
 }

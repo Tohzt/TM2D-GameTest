@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import MenuScene from "./menu.js";
 import FlappyScene from "./games/flappy/index.js";
 import TapsScene from "./games/taps/index.js";
+import DinoScene from "./games/dino/index.js";
 import WebApp from "@twa-dev/sdk";
 
 WebApp.ready();
@@ -25,5 +26,5 @@ const game = new Phaser.Game({
 			debug: false,
 		},
 	},
-	scene: [MenuScene, FlappyScene, TapsScene],
+	scene: [MenuScene, FlappyScene, TapsScene, DinoScene],
 });
