@@ -24,7 +24,7 @@ export class TileFactory {
 
 	createSpriteTile(x, y, row, col) {
 		const tile = this.scene.add.image(x, y, this.selectedSprite);
-		tile.setScale(0.6);
+		tile.setScale(0.7);
 		tile.setInteractive({ useHandCursor: true });
 		tile.tappable = true;
 		tile.row = row;
@@ -35,7 +35,7 @@ export class TileFactory {
 	}
 
 	createLosingTile(x, y, row, col) {
-		const tile = this.scene.add.rectangle(x, y, 80, 80, 0xff0000);
+		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000);
 		tile.setStrokeStyle(2, 0x000000);
 		tile.setInteractive({ useHandCursor: true });
 		tile.tappable = false;
@@ -48,7 +48,7 @@ export class TileFactory {
 
 	createPreviewTile(x, y, row, col) {
 		const tile = this.scene.add.image(x, y, this.selectedSprite);
-		tile.setScale(0.6);
+		tile.setScale(0.7);
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;
@@ -58,7 +58,7 @@ export class TileFactory {
 	}
 
 	createBackgroundTile(x, y, row, col) {
-		const tile = this.scene.add.rectangle(x, y, 80, 80, 0xff0000);
+		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000);
 		tile.setStrokeStyle(2, 0x000000);
 		tile.tappable = false;
 		tile.row = row;

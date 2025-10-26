@@ -1,15 +1,15 @@
 // Game configuration constants
 export const TAPS_CONFIG = {
 	GRID_COLS: 4,
-	TILE_WIDTH: 90,
-	TILE_HEIGHT: 100,
-	ACTIVE_ROW: 3, // 4th row from top (2nd from bottom)
-	GROUND_WIDTH: 360,
+	TILE_WIDTH: 95,
+	TILE_HEIGHT: 90,
+	ACTIVE_ROW: 4, // 5th row from top (bottom row)
+	GROUND_WIDTH: 380,
 	TIMER_DURATION: 30, // seconds
 
 	// Positions
-	GROUND_Y_OFFSET: 4, // rows from top
-	START_Y: 100,
+	GROUND_Y_OFFSET: 5, // rows from top
+	START_Y: 110, // Move rows up to show 5 rows
 
 	// Sprite selection
 	SPRITES: ["Cherry_1", "Cherry_2"],

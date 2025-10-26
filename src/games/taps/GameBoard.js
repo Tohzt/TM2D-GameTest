@@ -15,12 +15,12 @@ export class GameBoard {
 		this.tiles.forEach((row) => row.forEach((tile) => tile.destroy()));
 		this.tiles = [];
 
-		// Create initial board with 4 visible rows
-		for (let row = 0; row < 4; row++) {
+		// Create initial board with 5 visible rows
+		for (let row = 0; row < 5; row++) {
 			this.tiles[row] = [];
 			const y = TAPS_CONFIG.START_Y + row * TAPS_CONFIG.TILE_HEIGHT;
 			const spriteCol = Phaser.Math.Between(0, TAPS_CONFIG.GRID_COLS - 1);
-			const isActiveRow = row === 3;
+			const isActiveRow = row === 4;
 
 			for (let col = 0; col < TAPS_CONFIG.GRID_COLS; col++) {
 				const x =
@@ -44,9 +44,8 @@ export class GameBoard {
 	}
 
 	createGround() {
-		const groundY =
-			TAPS_CONFIG.START_Y +
-			TAPS_CONFIG.GROUND_Y_OFFSET * TAPS_CONFIG.TILE_HEIGHT;
+		// Position ground at the bottom of the screen (600 tall, ground center at bottom - height/2)
+		const groundY = 600 - TAPS_CONFIG.TILE_HEIGHT / 2; // Center of ground at bottom edge
 		this.ground = this.scene.add.rectangle(
 			200,
 			groundY,
@@ -93,15 +92,9 @@ export class GameBoard {
 			});
 		});
 
-		// Move ground down by one tile height, eventually scrolling it off screen
+		// Keep ground at bottom of screen
 		if (this.ground) {
-			this.ground.y = this.ground.y + TAPS_CONFIG.TILE_HEIGHT;
-		}
-
-		// If ground has moved too far down, remove it so it doesn't block the view
-		if (this.ground && this.ground.y > 650) {
-			this.ground.destroy();
-			this.ground = null;
+			this.ground.y = 600 - TAPS_CONFIG.TILE_HEIGHT / 2;
 		}
 
 		// Re-enable scrolling after a brief delay to allow tile repositioning to complete
