@@ -44,31 +44,53 @@ class MenuScene extends Phaser.Scene {
 			},
 		];
 
-		const gameSpacing = 200;
-		const startY = 350;
+		// Create scrollable container mask
+		const containerHeight = 400;
+		const containerY = 220;
+		const mask = this.add.rectangle(
+			200,
+			containerY,
+			380,
+			containerHeight,
+			0x000000,
+			0
+		);
+		mask.setOrigin(0.5);
+
+		const gameSpacing = 140; // Reduced from 200
+		const startY = 250; // Start closer to title
+		const cardWidth = 360; // Slightly wider to use more of the screen
+		const cardHeight = 100; // Slightly shorter
 
 		games.forEach((game, index) => {
 			const y = startY + index * gameSpacing;
 
 			// Create game card
-			const card = this.add.rectangle(200, y, 300, 120, game.color);
+			const card = this.add.rectangle(
+				200,
+				y,
+				cardWidth,
+				cardHeight,
+				game.color
+			);
 			card.setStrokeStyle(4, 0xffffff);
 			card.setInteractive({ useHandCursor: true });
 
 			// Game name
 			this.add
-				.text(200, y - 20, game.name, {
-					fontSize: "32px",
+				.text(200, y - 15, game.name, {
+					fontSize: "28px",
 					fill: "#fff",
 					fontFamily: "Arial",
 					fontStyle: "bold",
+					wordWrap: { width: cardWidth - 40 },
 				})
 				.setOrigin(0.5);
 
 			// Game description
 			this.add
-				.text(200, y + 20, game.description, {
-					fontSize: "16px",
+				.text(200, y + 15, game.description, {
+					fontSize: "14px",
 					fill: "#fff",
 					fontFamily: "Arial",
 				})
