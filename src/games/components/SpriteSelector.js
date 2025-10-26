@@ -1,4 +1,12 @@
 export class SpriteSelector {
+	// Depth values for selection screen elements
+	static DEPTHS = {
+		SPRITE_BOX: 14, // Sprite selection boxes
+		SPRITE_IMAGE: 15, // Sprite preview images
+		BUTTON_BG: 19, // Button backgrounds
+		UI: 20, // UI text elements
+	};
+
 	constructor(scene, options = {}) {
 		this.scene = scene;
 		this.selectedSprite = null;
@@ -29,7 +37,7 @@ export class SpriteSelector {
 					align: "center",
 				})
 				.setOrigin(0.5)
-				.setDepth(20);
+				.setDepth(SpriteSelector.DEPTHS.UI);
 		}
 
 		// Title text
@@ -41,13 +49,13 @@ export class SpriteSelector {
 				align: "center",
 			})
 			.setOrigin(0.5)
-			.setDepth(20);
+			.setDepth(SpriteSelector.DEPTHS.UI);
 
 		// Back button (at the bottom)
 		if (backCallback) {
 			const backBg = this.scene.add.rectangle(200, 550, 120, 50, 0xff0000);
 			backBg.setStrokeStyle(2, 0xffffff);
-			backBg.setDepth(19);
+			backBg.setDepth(SpriteSelector.DEPTHS.BUTTON_BG);
 			backBg.setInteractive({ useHandCursor: true });
 
 			const backText = this.scene.add
@@ -58,7 +66,7 @@ export class SpriteSelector {
 				})
 				.setOrigin(0.5)
 				.setInteractive({ useHandCursor: true });
-			backText.setDepth(20);
+			backText.setDepth(SpriteSelector.DEPTHS.UI);
 
 			const clickHandler = () => {
 				this.clearSelectionScreen();
@@ -88,13 +96,13 @@ export class SpriteSelector {
 				0.3
 			);
 			box.setStrokeStyle(4, 0xffffff);
-			box.setDepth(14);
+			box.setDepth(SpriteSelector.DEPTHS.SPRITE_BOX);
 			box.setInteractive();
 
 			// Create sprite preview
 			const sprite = this.scene.add.image(x, y, spriteKey);
 			sprite.setScale(1.0);
-			sprite.setDepth(15);
+			sprite.setDepth(SpriteSelector.DEPTHS.SPRITE_IMAGE);
 
 			// Add click handler
 			const clickHandler = () => {
@@ -133,8 +141,15 @@ export class SpriteSelector {
 	}
 
 	clearSelectionScreen() {
+		const depthsToClear = [
+			SpriteSelector.DEPTHS.SPRITE_BOX,
+			SpriteSelector.DEPTHS.SPRITE_IMAGE,
+			SpriteSelector.DEPTHS.BUTTON_BG,
+			SpriteSelector.DEPTHS.UI,
+		];
+
 		this.scene.children.list.slice().forEach((child) => {
-			if (child.depth === 14 || child.depth === 15 || child.depth === 20) {
+			if (depthsToClear.includes(child.depth)) {
 				child.destroy();
 			}
 		});
