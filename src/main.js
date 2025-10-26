@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import MenuScene from "./menu.js";
-import FlappyScene from "./games/flappy.js";
+import FlappyScene from "./games/flappy/index.js";
 import TapsScene from "./games/taps/index.js";
 import WebApp from "@twa-dev/sdk";
 
