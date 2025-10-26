@@ -141,45 +141,25 @@ export class TapsScene extends Phaser.Scene {
 		// Show score increase
 		this.uiManager.showScoreIncrease(tile.x, tile.y);
 
-		// Disable the clicked row
-		if (clickedRowIndex >= 0 && this.gameBoard.tiles[clickedRowIndex]) {
-			this.gameBoard.tiles[clickedRowIndex].forEach((t) => {
-				if (t && t.setInteractive) {
-					t.disableInteractive();
-					t.isActive = false;
-					t.setAlpha(0.5);
+		// Just scroll the pattern down - don't delete the row
+		this.gameBoard.scrollBoard();
+
+		// Set up click handlers for the bottom row (always index 4)
+		const bottomRowIndex = 4;
+		if (this.gameBoard.tiles[bottomRowIndex]) {
+			this.gameBoard.tiles[bottomRowIndex].forEach((tile) => {
+				if (tile) {
+					tile.isActive = true;
+					tile.removeAllListeners();
+					if (tile.isCorrect) {
+						tile.on("pointerdown", () => this.tapTile(tile));
+					} else {
+						tile.on("pointerdown", () => this.hitLosingTile());
+					}
+					tile.setInteractive({ useHandCursor: true });
 				}
 			});
 		}
-
-		// Disable all other tiles temporarily
-		this.gameBoard.tiles.forEach((row, idx) => {
-			if (idx !== clickedRowIndex) {
-				row.forEach((t) => {
-					if (t && t.setInteractive) {
-						t.disableInteractive();
-					}
-				});
-			}
-		});
-
-		// Store target positions before scrolling
-		this.gameBoard.storeTargetPositions();
-
-		// Scroll the board
-		this.gameBoard.scrollBoard();
-
-		// Immediately set up interactions for the NEW active row (one row up from clicked)
-		// This is the row that will become the bottom active row after scrolling
-		const newActiveRowIndex = clickedRowIndex - 1;
-		if (newActiveRowIndex >= 0 && this.gameBoard.tiles[newActiveRowIndex]) {
-			this.setupRowInteractions(newActiveRowIndex);
-		}
-
-		// Also set up after scroll completes for safety
-		this.time.delayedCall(200, () => {
-			this.setupTileInteractions();
-		});
 	}
 
 	setupRowInteractions(rowIndex) {
@@ -188,14 +168,27 @@ export class TapsScene extends Phaser.Scene {
 		const row = this.gameBoard.tiles[rowIndex];
 		if (row && row.length > 0) {
 			row.forEach((tile) => {
-				if (tile && tile.alpha >= 0.8) {
+				if (tile && tile.active) {
+					// Ensure the tile can be made interactive
+					if (!tile.input) {
+						tile.setInteractive();
+					}
+
 					tile.isActive = true;
 					tile.removeAllListeners();
+
+					// Change losing tiles to green to show they're in the active row
+					if (!tile.isCorrect && tile.setFillStyle) {
+						tile.setFillStyle(0x00ff00);
+					}
+
+					// Add click handlers
 					if (tile.isCorrect) {
 						tile.on("pointerdown", () => this.tapTile(tile));
 					} else {
 						tile.on("pointerdown", () => this.hitLosingTile());
 					}
+
 					tile.setInteractive({ useHandCursor: true });
 				}
 			});

@@ -7,7 +7,6 @@ export class GameBoard {
 		this.tileFactory = new TileFactory(scene, selectedSprite);
 		this.tiles = [];
 		this.ground = null;
-		this.isScrolling = false;
 	}
 
 	createBoard() {
@@ -50,7 +49,7 @@ export class GameBoard {
 			200,
 			groundY,
 			TAPS_CONFIG.GROUND_WIDTH,
-			TAPS_CONFIG.TILE_HEIGHT,
+			40, // Make it shorter
 			TAPS_CONFIG.GROUND_COLOR
 		);
 		this.ground.setStrokeStyle(4, 0x000000);
@@ -69,38 +68,135 @@ export class GameBoard {
 	}
 
 	scrollBoard() {
-		// Prevent concurrent scroll operations
-		if (this.isScrolling) {
-			return;
+		// Shift patterns down by copying data from row above
+		for (let rowIndex = 4; rowIndex >= 1; rowIndex--) {
+			const aboveRow = this.tiles[rowIndex - 1];
+			const currentRow = this.tiles[rowIndex];
+
+			if (aboveRow && currentRow) {
+				currentRow.forEach((tile, colIndex) => {
+					if (tile && aboveRow[colIndex]) {
+						const sourceTile = aboveRow[colIndex];
+						// Copy the state
+						tile.isCorrect = sourceTile.isCorrect;
+						tile.isActive = rowIndex === 4;
+
+						// Update visual appearance
+						if (sourceTile.type === "image" && tile.type === "image") {
+							// Both images, just change texture
+							tile.setTexture(sourceTile.texture.key);
+						} else if (
+							sourceTile.type === "rectangle" &&
+							tile.type === "rectangle"
+						) {
+							// Both rectangles, just change color
+							tile.setFillStyle(0xff0000);
+						} else {
+							// Different types, need to convert
+							const newTile = this.convertTileType(
+								tile,
+								sourceTile,
+								rowIndex === 4
+							);
+							if (newTile) {
+								newTile.isCorrect = sourceTile.isCorrect;
+								newTile.isActive = rowIndex === 4;
+								newTile.setInteractive({ useHandCursor: true });
+								this.tiles[rowIndex][colIndex] = newTile;
+							}
+						}
+					}
+				});
+			}
 		}
 
-		this.isScrolling = true;
+		// Generate new pattern for top row
+		const topRow = this.tiles[0];
+		const spriteCol = Phaser.Math.Between(0, TAPS_CONFIG.GRID_COLS - 1);
 
-		// Remove tiles that have gone off screen
-		this.removeOffScreenTiles();
-
-		// Add a new row at the top
-		this.addNewRow();
-
-		// Reposition all tiles to keep active row at same screen position
-		this.tiles.forEach((row, rowIndex) => {
-			const targetY = TAPS_CONFIG.START_Y + rowIndex * TAPS_CONFIG.TILE_HEIGHT;
-			row.forEach((tile) => {
-				if (tile && !tile.willDestroy) {
-					tile.y = targetY;
+		topRow.forEach((tile, colIndex) => {
+			if (tile) {
+				const isSprite = colIndex === spriteCol;
+				if (tile.type === "image") {
+					if (isSprite) {
+						tile.setTexture(this.tileFactory.selectedSprite);
+						tile.isCorrect = true;
+					} else {
+						// Convert to rectangle for preview
+						const newTile = this.convertImageToRect(tile, 0xff0000);
+						if (newTile) {
+							newTile.isCorrect = false;
+							newTile.isActive = false;
+							this.tiles[0][colIndex] = newTile;
+						}
+					}
+				} else {
+					// Already a rectangle
+					if (isSprite) {
+						// Convert to sprite
+						const newTile = this.convertRectToImage(
+							tile,
+							this.tileFactory.selectedSprite
+						);
+						if (newTile) {
+							newTile.isCorrect = true;
+							newTile.isActive = false;
+							this.tiles[0][colIndex] = newTile;
+						}
+					} else {
+						tile.setFillStyle(0xff0000);
+						tile.isCorrect = false;
+					}
 				}
-			});
+				tile.isActive = false;
+			}
 		});
 
-		// Keep ground at bottom of screen
+		// Keep ground at bottom
 		if (this.ground) {
 			this.ground.y = 600 - TAPS_CONFIG.TILE_HEIGHT / 2;
 		}
+	}
 
-		// Re-enable scrolling after a brief delay to allow tile repositioning to complete
-		this.scene.time.delayedCall(50, () => {
-			this.isScrolling = false;
-		});
+	convertTileType(targetTile, sourceTile, isActive) {
+		// Destroy and recreate tile
+		const oldX = targetTile.x;
+		const oldY = targetTile.y;
+		targetTile.destroy();
+
+		let newTile;
+		if (sourceTile.type === "image") {
+			newTile = this.scene.add.image(oldX, oldY, sourceTile.texture.key);
+			newTile.setScale(0.7);
+			newTile.type = "image";
+		} else {
+			newTile = this.scene.add.rectangle(oldX, oldY, 90, 85, 0xff0000);
+			newTile.setStrokeStyle(2, 0x000000);
+			newTile.type = "rectangle";
+		}
+		return newTile;
+	}
+
+	convertImageToRect(tile, color) {
+		const oldX = tile.x;
+		const oldY = tile.y;
+		tile.destroy();
+		const rect = this.scene.add.rectangle(oldX, oldY, 90, 85, color);
+		rect.setStrokeStyle(2, 0x000000);
+		rect.setInteractive({ useHandCursor: true });
+		rect.type = "rectangle";
+		return rect;
+	}
+
+	convertRectToImage(tile, spriteKey) {
+		const oldX = tile.x;
+		const oldY = tile.y;
+		tile.destroy();
+		const img = this.scene.add.image(oldX, oldY, spriteKey);
+		img.setScale(0.7);
+		img.setInteractive({ useHandCursor: true });
+		img.type = "image";
+		return img;
 	}
 
 	removeOffScreenTiles() {
@@ -142,6 +238,10 @@ export class GameBoard {
 			);
 			// Position it directly - no animation since we're repositioning instantly
 			tile.y = targetY;
+			// Make tiles interactive so they can be clicked when they become the active row
+			if (!tile.input) {
+				tile.setInteractive({ useHandCursor: true });
+			}
 			newRow.push(tile);
 		}
 

@@ -31,11 +31,13 @@ export class TileFactory {
 		tile.col = col;
 		tile.isCorrect = true;
 		tile.isActive = true;
+		tile.type = "image"; // Mark as image type
 		return tile;
 	}
 
 	createLosingTile(x, y, row, col) {
-		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000);
+		// Create a placeholder image for the "wrong" tile that we can texture
+		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000); // Red for losing tile
 		tile.setStrokeStyle(2, 0x000000);
 		tile.setInteractive({ useHandCursor: true });
 		tile.tappable = false;
@@ -43,6 +45,7 @@ export class TileFactory {
 		tile.col = col;
 		tile.isCorrect = false;
 		tile.isActive = true;
+		tile.type = "rectangle"; // Mark as rectangle type
 		return tile;
 	}
 
@@ -54,6 +57,7 @@ export class TileFactory {
 		tile.col = col;
 		tile.isCorrect = true;
 		tile.isActive = false;
+		tile.type = "image";
 		return tile;
 	}
 
@@ -65,6 +69,7 @@ export class TileFactory {
 		tile.col = col;
 		tile.isCorrect = false;
 		tile.isActive = false;
+		tile.type = "rectangle";
 		return tile;
 	}
 }
