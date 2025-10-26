@@ -59,6 +59,12 @@ class TapsScene extends Phaser.Scene {
 	startGame() {
 		this.gameStarted = true;
 		this.timer = 30;
+
+		// Hide the start text
+		if (this.startText) {
+			this.startText.destroy();
+		}
+
 		this.createGameBoard();
 		this.updateTimerDisplay();
 	}
@@ -489,7 +495,7 @@ class TapsScene extends Phaser.Scene {
 
 	updateTimerDisplay() {
 		if (this.timerText) {
-			this.timerText.setText(`${this.timer.toFixed(1)}"`);
+			this.timerText.setText(`${this.timer.toFixed(1)}s`);
 		}
 	}
 
@@ -600,7 +606,7 @@ class TapsScene extends Phaser.Scene {
 		this.highScoreText.setOrigin(1, 0);
 		this.highScoreText.setDepth(20);
 
-		this.timerText = this.add.text(200, 16, '30.0"', {
+		this.timerText = this.add.text(200, 16, "30.0s", {
 			fontSize: "24px",
 			fill: "#ff0000",
 			fontFamily: "Arial",
