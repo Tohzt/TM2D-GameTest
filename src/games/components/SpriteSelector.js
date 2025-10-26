@@ -17,7 +17,21 @@ export class SpriteSelector {
 		};
 	}
 
-	showSelectionScreen(callback) {
+	showSelectionScreen(callback, backCallback) {
+		// Game name text (if provided)
+		if (this.config.gameName) {
+			this.scene.add
+				.text(200, 50, this.config.gameName, {
+					fontSize: "36px",
+					fill: "#fff",
+					fontFamily: "Arial",
+					fontStyle: "bold",
+					align: "center",
+				})
+				.setOrigin(0.5)
+				.setDepth(20);
+		}
+
 		// Title text
 		this.scene.add
 			.text(200, this.config.titleY, this.config.title, {
@@ -28,6 +42,32 @@ export class SpriteSelector {
 			})
 			.setOrigin(0.5)
 			.setDepth(20);
+
+		// Back button (at the bottom)
+		if (backCallback) {
+			const backBg = this.scene.add.rectangle(200, 550, 120, 50, 0xff0000);
+			backBg.setStrokeStyle(2, 0xffffff);
+			backBg.setDepth(19);
+			backBg.setInteractive({ useHandCursor: true });
+
+			const backText = this.scene.add
+				.text(200, 550, "Back", {
+					fontSize: "24px",
+					fill: "#fff",
+					fontFamily: "Arial",
+				})
+				.setOrigin(0.5)
+				.setInteractive({ useHandCursor: true });
+			backText.setDepth(20);
+
+			const clickHandler = () => {
+				this.clearSelectionScreen();
+				backCallback();
+			};
+
+			backBg.on("pointerdown", clickHandler);
+			backText.on("pointerdown", clickHandler);
+		}
 
 		// Available sprites
 		const sprites = this.config.sprites;

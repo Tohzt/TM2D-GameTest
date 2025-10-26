@@ -24,14 +24,21 @@ export class TapsScene extends Phaser.Scene {
 			spriteBoxSize: 140,
 			titleY: 120,
 			spriteY: 300,
+			gameName: "Don't Tap Red!",
 		});
 		this.uiManager = new UIManager(this);
 
 		// Show sprite selection screen
-		this.spriteSelector.showSelectionScreen((spriteKey) => {
-			this.selectedSprite = spriteKey;
-			this.initializeGame();
-		});
+		this.spriteSelector.showSelectionScreen(
+			(spriteKey) => {
+				this.selectedSprite = spriteKey;
+				this.initializeGame();
+			},
+			() => {
+				// Back button - return to menu
+				this.scene.start("MenuScene");
+			}
+		);
 
 		// Game state
 		this.score = 0;

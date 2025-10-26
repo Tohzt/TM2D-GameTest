@@ -24,15 +24,22 @@ export class FlappyScene extends Phaser.Scene {
 			spriteBoxSize: FLAPPY_CONFIG.SPRITE_BOX_SIZE,
 			titleY: 100,
 			spriteY: 250,
+			gameName: "Flappy Bird",
 		});
 		this.uiManager = new UIManager(this);
 		this.pipeManager = new PipeManager(this);
 
 		// Show sprite selection screen
-		this.spriteSelector.showSelectionScreen((spriteKey) => {
-			this.selectedSprite = spriteKey;
-			this.initializeGame();
-		});
+		this.spriteSelector.showSelectionScreen(
+			(spriteKey) => {
+				this.selectedSprite = spriteKey;
+				this.initializeGame();
+			},
+			() => {
+				// Back button - return to menu
+				this.scene.start("MenuScene");
+			}
+		);
 
 		// Create ground
 		this.createGround();
