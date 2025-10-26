@@ -201,13 +201,17 @@ export class TapsScene extends Phaser.Scene {
 		this.gameOver = true;
 		this.time.removeAllEvents();
 
-		const { restartText, menuText } = this.uiManager.showGameOver(this.score);
+		const { retryText, quitText } = this.uiManager.showEndGame(
+			"Game Over!",
+			"#ffffff",
+			this.score
+		);
 
-		restartText.on("pointerdown", () => {
+		retryText.on("pointerdown", () => {
 			this.restartGame();
 		});
 
-		menuText.on("pointerdown", () => {
+		quitText.on("pointerdown", () => {
 			this.scene.start("MenuScene");
 		});
 	}
@@ -218,30 +222,49 @@ export class TapsScene extends Phaser.Scene {
 		this.gameOver = true;
 		this.time.removeAllEvents();
 
-		const { restartText, menuText } = this.uiManager.showTimeUp();
+		const { retryText, quitText } = this.uiManager.showEndGame(
+			"Time Up!",
+			"#00ff00",
+			this.score
+		);
 
-		restartText.on("pointerdown", () => {
+		retryText.on("pointerdown", () => {
 			this.restartGame();
 		});
 
-		menuText.on("pointerdown", () => {
+		quitText.on("pointerdown", () => {
 			this.scene.start("MenuScene");
 		});
 	}
 
 	restartGame() {
+		// Clean up end game UI
+		this.uiManager.clearEndGameUI();
+
+		// Destroy board first
+		if (this.gameBoard) {
+			this.gameBoard.destroy();
+			this.gameBoard = null;
+		}
+
+		// Clean up previous game state
 		this.gameOver = false;
 		this.gameStarted = false;
 		this.score = 0;
 		this.timer = TAPS_CONFIG.TIMER_DURATION;
 		this.uiManager.resetScore();
 
-		// Destroy board
-		if (this.gameBoard) {
-			this.gameBoard.destroy();
-		}
+		// Reset UI
+		this.uiManager.hideStartText();
 
-		this.scene.restart();
+		// Create a completely fresh board
+		this.gameBoard = new GameBoard(this, this.selectedSprite);
+		this.gameBoard.createBoard();
+
+		// Re-enable input
+		this.gameStarted = true;
+
+		this.setupTileInteractions();
 	}
 }
 

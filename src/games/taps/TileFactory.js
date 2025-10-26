@@ -26,6 +26,7 @@ export class TileFactory {
 		const tile = this.scene.add.image(x, y, this.selectedSprite);
 		tile.setScale(0.7);
 		tile.setInteractive({ useHandCursor: true });
+		tile.setDepth(10); // Set depth for proper rendering
 		tile.tappable = true;
 		tile.row = row;
 		tile.col = col;
@@ -40,6 +41,7 @@ export class TileFactory {
 		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000); // Red for losing tile
 		tile.setStrokeStyle(2, 0x000000);
 		tile.setInteractive({ useHandCursor: true });
+		tile.setDepth(10); // Set depth for proper rendering
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;
@@ -52,6 +54,7 @@ export class TileFactory {
 	createPreviewTile(x, y, row, col) {
 		const tile = this.scene.add.image(x, y, this.selectedSprite);
 		tile.setScale(0.7);
+		tile.setDepth(10); // Set depth for proper rendering
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;
@@ -64,6 +67,7 @@ export class TileFactory {
 	createBackgroundTile(x, y, row, col) {
 		const tile = this.scene.add.rectangle(x, y, 90, 85, 0xff0000);
 		tile.setStrokeStyle(2, 0x000000);
+		tile.setDepth(10); // Set depth for proper rendering
 		tile.tappable = false;
 		tile.row = row;
 		tile.col = col;

@@ -11,8 +11,24 @@ export class GameBoard {
 
 	createBoard() {
 		// Clear any existing tiles
-		this.tiles.forEach((row) => row.forEach((tile) => tile.destroy()));
+		if (this.tiles && this.tiles.length > 0) {
+			this.tiles.forEach((row) => {
+				if (row) {
+					row.forEach((tile) => {
+						if (tile && tile.destroy) {
+							tile.destroy();
+						}
+					});
+				}
+			});
+		}
 		this.tiles = [];
+
+		// Clear ground if it exists
+		if (this.ground) {
+			this.ground.destroy();
+			this.ground = null;
+		}
 
 		// Create initial board with 5 visible rows
 		for (let row = 0; row < 5; row++) {
@@ -43,6 +59,11 @@ export class GameBoard {
 	}
 
 	createGround() {
+		// Clear existing ground if it exists
+		if (this.ground) {
+			this.ground.destroy();
+		}
+
 		// Position ground at the bottom of the screen (600 tall, ground center at bottom - height/2)
 		const groundY = 600 - TAPS_CONFIG.TILE_HEIGHT / 2; // Center of ground at bottom edge
 		this.ground = this.scene.add.rectangle(
@@ -168,10 +189,12 @@ export class GameBoard {
 		if (sourceTile.type === "image") {
 			newTile = this.scene.add.image(oldX, oldY, sourceTile.texture.key);
 			newTile.setScale(0.7);
+			newTile.setDepth(10);
 			newTile.type = "image";
 		} else {
 			newTile = this.scene.add.rectangle(oldX, oldY, 90, 85, 0xff0000);
 			newTile.setStrokeStyle(2, 0x000000);
+			newTile.setDepth(10);
 			newTile.type = "rectangle";
 		}
 		return newTile;
@@ -183,6 +206,7 @@ export class GameBoard {
 		tile.destroy();
 		const rect = this.scene.add.rectangle(oldX, oldY, 90, 85, color);
 		rect.setStrokeStyle(2, 0x000000);
+		rect.setDepth(10);
 		rect.setInteractive({ useHandCursor: true });
 		rect.type = "rectangle";
 		return rect;
@@ -194,6 +218,7 @@ export class GameBoard {
 		tile.destroy();
 		const img = this.scene.add.image(oldX, oldY, spriteKey);
 		img.setScale(0.7);
+		img.setDepth(10);
 		img.setInteractive({ useHandCursor: true });
 		img.type = "image";
 		return img;

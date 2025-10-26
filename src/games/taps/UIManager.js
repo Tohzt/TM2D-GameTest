@@ -8,6 +8,7 @@ export class UIManager {
 		this.timerText = null;
 		this.startText = null;
 		this.highScore = parseInt(localStorage.getItem("tapsHighScore") || "0");
+		this.endGameElements = [];
 	}
 
 	createGameUI() {
@@ -78,96 +79,91 @@ export class UIManager {
 		}
 	}
 
-	showGameOver(score) {
+	showEndGame(title, titleColor, score) {
+		// Clear any existing end game elements
+		this.clearEndGameUI();
+
 		const background = this.scene.add.rectangle(
 			200,
 			300,
 			350,
-			250,
+			280,
 			0x000000,
 			0.8
 		);
 		background.setStrokeStyle(4, 0xffffff);
 		background.setDepth(18);
 		background.setInteractive();
+		this.endGameElements.push(background);
 
-		const gameOverText = this.scene.add
-			.text(200, 300, "Game Over!", {
+		const titleText = this.scene.add
+			.text(200, 230, title, {
 				fontSize: "32px",
+				fill: titleColor,
+				fontFamily: "Arial",
+				align: "center",
+			})
+			.setOrigin(0.5);
+		titleText.setDepth(20);
+		this.endGameElements.push(titleText);
+
+		const scoreText = this.scene.add
+			.text(200, 270, `Score: ${score}`, {
+				fontSize: "24px",
 				fill: "#fff",
 				fontFamily: "Arial",
 				align: "center",
 			})
 			.setOrigin(0.5);
-		gameOverText.setDepth(20);
+		scoreText.setDepth(20);
+		this.endGameElements.push(scoreText);
 
-		const restartText = this.scene.add
-			.text(200, 370, "Tap to Restart", {
+		// Retry button background (yellow)
+		const retryBg = this.scene.add.rectangle(140, 380, 100, 40, 0xffff00);
+		retryBg.setStrokeStyle(2, 0xffffff);
+		retryBg.setDepth(19);
+		retryBg.setInteractive({ useHandCursor: true });
+		this.endGameElements.push(retryBg);
+
+		const retryText = this.scene.add
+			.text(140, 380, "Retry", {
 				fontSize: "24px",
-				fill: "#ffff00",
+				fill: "#000000",
 				fontFamily: "Arial",
 			})
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true });
-		restartText.setDepth(20);
+		retryText.setDepth(20);
+		this.endGameElements.push(retryText);
 
-		const menuText = this.scene.add
-			.text(200, 450, "Menu", {
+		// Quit button background (red)
+		const quitBg = this.scene.add.rectangle(260, 380, 100, 40, 0xff0000);
+		quitBg.setStrokeStyle(2, 0xffffff);
+		quitBg.setDepth(19);
+		quitBg.setInteractive({ useHandCursor: true });
+		this.endGameElements.push(quitBg);
+
+		const quitText = this.scene.add
+			.text(260, 380, "Quit", {
 				fontSize: "24px",
-				fill: "#4ec0ca",
+				fill: "#fff",
 				fontFamily: "Arial",
 			})
 			.setOrigin(0.5)
 			.setInteractive({ useHandCursor: true });
-		menuText.setDepth(20);
+		quitText.setDepth(20);
+		this.endGameElements.push(quitText);
 
-		return { restartText, menuText, gameOverText };
+		return { retryText, quitText };
 	}
 
-	showTimeUp() {
-		const background = this.scene.add.rectangle(
-			200,
-			300,
-			350,
-			250,
-			0x000000,
-			0.8
-		);
-		background.setStrokeStyle(4, 0xffffff);
-		background.setDepth(18);
-		background.setInteractive();
-
-		const successText = this.scene.add
-			.text(200, 300, "Time Up!", {
-				fontSize: "32px",
-				fill: "#00ff00",
-				fontFamily: "Arial",
-				align: "center",
-			})
-			.setOrigin(0.5);
-		successText.setDepth(20);
-
-		const restartText = this.scene.add
-			.text(200, 370, "Tap to Continue", {
-				fontSize: "24px",
-				fill: "#ffff00",
-				fontFamily: "Arial",
-			})
-			.setOrigin(0.5)
-			.setInteractive({ useHandCursor: true });
-		restartText.setDepth(20);
-
-		const menuText = this.scene.add
-			.text(200, 450, "Menu", {
-				fontSize: "24px",
-				fill: "#4ec0ca",
-				fontFamily: "Arial",
-			})
-			.setOrigin(0.5)
-			.setInteractive({ useHandCursor: true });
-		menuText.setDepth(20);
-
-		return { restartText, menuText, successText };
+	clearEndGameUI() {
+		this.endGameElements.forEach((element) => {
+			if (element && element.destroy) {
+				element.destroy();
+			}
+		});
+		this.endGameElements = [];
 	}
 
 	showScoreIncrease(x, y) {
