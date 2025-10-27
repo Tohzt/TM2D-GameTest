@@ -120,12 +120,19 @@ export class UIManager {
 	}
 
 	showGameOver(title, score, subtitle = null) {
-		// Save to backend API only at game end if it's a new high score
-		if (score > this.highScore) {
+		this.clearEndGameUI();
+
+		// Check if this is a new high score
+		const isNewHighScore = score > this.highScore;
+		let displayTitle = title;
+
+		// Update high score if new record
+		if (isNewHighScore) {
+			this.highScore = score;
+			displayTitle = "🎉 NEW HIGH SCORE! 🎉";
+			// Save to backend API
 			apiService.saveScore(this.gameId, score);
 		}
-
-		this.clearEndGameUI();
 
 		const background = this.scene.add.rectangle(
 			200,
@@ -135,15 +142,15 @@ export class UIManager {
 			0x000000,
 			0.8
 		);
-		background.setStrokeStyle(4, 0xffffff);
+		background.setStrokeStyle(4, isNewHighScore ? 0xffff00 : 0xffffff);
 		background.setDepth(18);
 		background.setInteractive();
 		this.endGameElements.push(background);
 
 		const titleText = this.scene.add
-			.text(200, 230, title, {
-				fontSize: "32px",
-				fill: "#fff",
+			.text(200, 230, displayTitle, {
+				fontSize: isNewHighScore ? "28px" : "32px",
+				fill: isNewHighScore ? "#ffff00" : "#fff",
 				fontFamily: "Arial",
 				align: "center",
 			})
