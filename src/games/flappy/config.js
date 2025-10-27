@@ -6,7 +6,7 @@ export const FLAPPY_CONFIG = {
 	BIRD_SCALE: 0.4,
 	BIRD_COLLISION_RADIUS: 18,
 	GRAVITY: 1000,
-	FLAP_VELOCITY: -350,
+	FLAP_VELOCITY: -500,
 
 	// Pipe settings
 	PIPE_WIDTH: 60,
@@ -33,4 +33,26 @@ export const FLAPPY_CONFIG = {
 	SPRITES: ["Cherry_1", "Cherry_2"],
 	SPRITE_SPACING: 180,
 	SPRITE_BOX_SIZE: 140,
+};
+
+// Phaser game configuration for React wrapper
+import FlappyScene from "./FlappyScene.js";
+
+export default {
+	scale: {
+		mode: "FIT",
+		autoCenter: "CENTER_BOTH",
+		width: 400,
+		height: 600,
+	},
+	parent: "game-container",
+	backgroundColor: 0x4ec0ca,
+	physics: {
+		default: "arcade",
+		arcade: {
+			gravity: { y: 1000 },
+			debug: false,
+		},
+	},
+	scene: [FlappyScene],
 };

@@ -5,8 +5,8 @@ export const DINO_CONFIG = {
 	DINO_SCALE: 0.4,
 	DINO_COLLISION_WIDTH: 36,
 	DINO_COLLISION_HEIGHT: 40,
-	GRAVITY: 1600,
-	JUMP_VELOCITY: -600,
+	GRAVITY: 1400,
+	JUMP_VELOCITY: -850,
 
 	// Ground settings
 	GROUND_Y: 540,
@@ -37,4 +37,26 @@ export const DINO_CONFIG = {
 	SPRITES: ["Cherry_1", "Cherry_2"],
 	SPRITE_SPACING: 180,
 	SPRITE_BOX_SIZE: 140,
+};
+
+// Phaser game configuration for React wrapper
+import DinoScene from "./DinoScene.js";
+
+export default {
+	scale: {
+		mode: "FIT",
+		autoCenter: "CENTER_BOTH",
+		width: 400,
+		height: 600,
+	},
+	parent: "game-container",
+	backgroundColor: 0x2a2a2a,
+	physics: {
+		default: "arcade",
+		arcade: {
+			gravity: { y: 1600 },
+			debug: false,
+		},
+	},
+	scene: [DinoScene],
 };

@@ -37,3 +37,25 @@ export const FROGGER_CONFIG = {
 	SPRITE_SPACING: 180,
 	SPRITE_BOX_SIZE: 140,
 };
+
+// Phaser game configuration for React wrapper
+import FroggerScene from "./FroggerScene.js";
+
+export default {
+	scale: {
+		mode: "FIT",
+		autoCenter: "CENTER_BOTH",
+		width: 400,
+		height: 600,
+	},
+	parent: "game-container",
+	backgroundColor: 0x228b22,
+	physics: {
+		default: "arcade",
+		arcade: {
+			gravity: { y: 0 },
+			debug: false,
+		},
+	},
+	scene: [FroggerScene],
+};

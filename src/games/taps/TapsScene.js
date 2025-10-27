@@ -26,15 +26,10 @@ export class TapsScene extends Phaser.Scene {
 		});
 		this.uiManager = new UIManager(this);
 
-		this.spriteSelector.showSelectionScreen(
-			(spriteKey) => {
-				this.selectedSprite = spriteKey;
-				this.initializeGame();
-			},
-			() => {
-				this.scene.start("MenuScene");
-			}
-		);
+		this.spriteSelector.showSelectionScreen((spriteKey) => {
+			this.selectedSprite = spriteKey;
+			this.initializeGame();
+		});
 		this.score = 0;
 		this.gameOver = false;
 		this.gameStarted = false;
@@ -185,7 +180,7 @@ export class TapsScene extends Phaser.Scene {
 		this.gameOver = true;
 		this.time.removeAllEvents();
 
-		const { retryText, quitText } = this.uiManager.showEndGame(
+		const { retryText } = this.uiManager.showEndGame(
 			"Game Over!",
 			"#ffffff",
 			this.score
@@ -193,10 +188,6 @@ export class TapsScene extends Phaser.Scene {
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 
@@ -206,7 +197,7 @@ export class TapsScene extends Phaser.Scene {
 		this.gameOver = true;
 		this.time.removeAllEvents();
 
-		const { retryText, quitText } = this.uiManager.showEndGame(
+		const { retryText } = this.uiManager.showEndGame(
 			"Time Up!",
 			"#00ff00",
 			this.score
@@ -214,10 +205,6 @@ export class TapsScene extends Phaser.Scene {
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 

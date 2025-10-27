@@ -27,15 +27,10 @@ export class FlappyScene extends Phaser.Scene {
 		this.uiManager = new UIManager(this);
 		this.pipeManager = new PipeManager(this);
 
-		this.spriteSelector.showSelectionScreen(
-			(spriteKey) => {
-				this.selectedSprite = spriteKey;
-				this.initializeGame();
-			},
-			() => {
-				this.scene.start("MenuScene");
-			}
-		);
+		this.spriteSelector.showSelectionScreen((spriteKey) => {
+			this.selectedSprite = spriteKey;
+			this.initializeGame();
+		});
 
 		this.createGround();
 		this.score = 0;
@@ -87,13 +82,6 @@ export class FlappyScene extends Phaser.Scene {
 			null,
 			this
 		);
-		this.pipeCollider = this.physics.add.overlap(
-			this.birdCollision,
-			this.pipeManager.pipes,
-			this.hitObstacle,
-			null,
-			this
-		);
 	}
 
 	update() {
@@ -109,11 +97,34 @@ export class FlappyScene extends Phaser.Scene {
 		}
 
 		const angle = Phaser.Math.Clamp(
-			this.birdCollision.body.velocity.y * 0.1,
+			this.birdCollision.body.velocity.y * 0.05,
 			-30,
 			90
 		);
 		this.bird.angle = angle;
+
+		// Check for pipe collisions manually
+		const birdX = this.birdCollision.x;
+		const birdY = this.birdCollision.y;
+		const birdRadius = FLAPPY_CONFIG.BIRD_COLLISION_RADIUS;
+
+		this.pipeManager.pipes.forEach((pipe) => {
+			const pipeLeft = pipe.x - FLAPPY_CONFIG.PIPE_WIDTH / 2;
+			const pipeRight = pipe.x + FLAPPY_CONFIG.PIPE_WIDTH / 2;
+			const pipeTop = pipe.y - FLAPPY_CONFIG.PIPE_HEIGHT / 2;
+			const pipeBottom = pipe.y + FLAPPY_CONFIG.PIPE_HEIGHT / 2;
+
+			// Check if bird collides with pipe
+			if (
+				birdX + birdRadius > pipeLeft &&
+				birdX - birdRadius < pipeRight &&
+				birdY + birdRadius > pipeTop &&
+				birdY - birdRadius < pipeBottom
+			) {
+				this.hitObstacle();
+			}
+		});
+
 		const scored = this.pipeManager.update(this.bird);
 		if (scored) {
 			this.score += 1;
@@ -155,14 +166,10 @@ export class FlappyScene extends Phaser.Scene {
 		this.physics.pause();
 		this.bird.setTint(0xff0000);
 
-		const { retryText, quitText } = this.uiManager.showGameOver(this.score);
+		const { retryText } = this.uiManager.showGameOver(this.score);
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 
@@ -184,23 +191,11 @@ export class FlappyScene extends Phaser.Scene {
 		this.birdCollision.body.setVelocity(0, 0);
 		this.birdCollision.body.setGravityY(0);
 
-		if (this.pipeCollider) {
-			this.pipeCollider.destroy();
-		}
-
 		if (this.pipeManager) {
 			this.pipeManager.destroy();
 		}
 
 		this.pipeManager = new PipeManager(this);
-
-		this.pipeCollider = this.physics.add.overlap(
-			this.birdCollision,
-			this.pipeManager.pipes,
-			this.hitObstacle,
-			null,
-			this
-		);
 
 		this.physics.resume();
 	}
