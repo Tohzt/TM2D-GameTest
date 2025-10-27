@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { DINO_CONFIG } from "./config.js";
+import apiService from "../../services/api.js";
 
 export class UIManager {
 	constructor(scene) {
@@ -54,6 +55,9 @@ export class UIManager {
 			this.highScore = score;
 			this.updateHighScore(score);
 			localStorage.setItem("dinoRunnerHighScore", score.toString());
+
+			// Save to backend API
+			apiService.saveScore("dino", score);
 		}
 	}
 

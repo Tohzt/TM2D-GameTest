@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import WebApp from "@twa-dev/sdk";
+import apiService from "./services/api.js";
 import "./index.css";
 
 // Initialize Telegram SDK BEFORE React renders
@@ -11,6 +12,9 @@ try {
 	WebApp.expand();
 	WebApp.setHeaderColor("#667eea");
 	WebApp.enableClosingConfirmation();
+
+	// Initialize API service
+	apiService.init();
 } catch (e) {
 	// If in non-Telegram environment, just continue
 	console.log("Telegram WebApp not available");

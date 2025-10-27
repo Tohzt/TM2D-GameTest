@@ -1,4 +1,5 @@
 import { CATCH_CONFIG } from "./config.js";
+import apiService from "../../services/api.js";
 
 export class UIManager {
 	constructor(scene) {
@@ -51,6 +52,9 @@ export class UIManager {
 			this.highScore = score;
 			this.updateHighScore(score);
 			localStorage.setItem("catchHighScore", score.toString());
+
+			// Save to backend API
+			apiService.saveScore("catch", score);
 		}
 	}
 
