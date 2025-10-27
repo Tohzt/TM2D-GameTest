@@ -23,7 +23,7 @@ export class SpriteSelector {
 		};
 	}
 
-	showSelectionScreen(callback, backCallback) {
+	showSelectionScreen(callback) {
 		if (this.config.gameName) {
 			this.scene.add
 				.text(200, 50, this.config.gameName, {
@@ -47,32 +47,6 @@ export class SpriteSelector {
 			})
 			.setOrigin(0.5)
 			.setDepth(SpriteSelector.DEPTHS.UI);
-
-		// Back button (at the bottom)
-		if (backCallback) {
-			const backBg = this.scene.add.rectangle(200, 550, 120, 50, 0xff0000);
-			backBg.setStrokeStyle(2, 0xffffff);
-			backBg.setDepth(SpriteSelector.DEPTHS.BUTTON_BG);
-			backBg.setInteractive({ useHandCursor: true });
-
-			const backText = this.scene.add
-				.text(200, 550, "Back", {
-					fontSize: "24px",
-					fill: "#fff",
-					fontFamily: "Arial",
-				})
-				.setOrigin(0.5)
-				.setInteractive({ useHandCursor: true });
-			backText.setDepth(SpriteSelector.DEPTHS.UI);
-
-			const clickHandler = () => {
-				this.clearSelectionScreen();
-				backCallback();
-			};
-
-			backBg.on("pointerdown", clickHandler);
-			backText.on("pointerdown", clickHandler);
-		}
 
 		const sprites = this.config.sprites;
 		const spriteSpacing = this.config.spriteSpacing;

@@ -29,15 +29,10 @@ export class FroggerScene extends Phaser.Scene {
 		this.vehicleManager = new VehicleManager(this);
 		this.logManager = new LogManager(this);
 
-		this.spriteSelector.showSelectionScreen(
-			(spriteKey) => {
-				this.selectedSprite = spriteKey;
-				this.initializeGame();
-			},
-			() => {
-				this.scene.start("MenuScene");
-			}
-		);
+		this.spriteSelector.showSelectionScreen((spriteKey) => {
+			this.selectedSprite = spriteKey;
+			this.initializeGame();
+		});
 
 		this.createBackground();
 		this.score = 0;
@@ -495,14 +490,10 @@ export class FroggerScene extends Phaser.Scene {
 		// Pause the game
 		this.physics.pause();
 
-		const { retryText, quitText } = this.uiManager.showWin(this.score);
+		const { retryText } = this.uiManager.showWin(this.score);
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 
@@ -553,14 +544,10 @@ export class FroggerScene extends Phaser.Scene {
 		this.gameOver = true;
 		this.frog.setTint(0xff0000);
 
-		const { retryText, quitText } = this.uiManager.showGameOver(this.score);
+		const { retryText } = this.uiManager.showGameOver(this.score);
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 

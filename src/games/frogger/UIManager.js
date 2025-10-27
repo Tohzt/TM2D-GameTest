@@ -82,14 +82,14 @@ export class UIManager {
 		scoreText.setDepth(FROGGER_CONFIG.UI_DEPTH);
 		this.endGameElements.push(scoreText);
 
-		const retryBg = this.scene.add.rectangle(140, 380, 100, 40, 0xffff00);
+		const retryBg = this.scene.add.rectangle(200, 380, 100, 40, 0xffff00);
 		retryBg.setStrokeStyle(2, 0xffffff);
 		retryBg.setDepth(19);
 		retryBg.setInteractive({ useHandCursor: true });
 		this.endGameElements.push(retryBg);
 
 		const retryText = this.scene.add
-			.text(140, 380, "Retry", {
+			.text(200, 380, "Retry", {
 				fontSize: "24px",
 				fill: "#000000",
 				fontFamily: "Arial",
@@ -99,24 +99,7 @@ export class UIManager {
 		retryText.setDepth(FROGGER_CONFIG.UI_DEPTH);
 		this.endGameElements.push(retryText);
 
-		const quitBg = this.scene.add.rectangle(260, 380, 100, 40, 0xff0000);
-		quitBg.setStrokeStyle(2, 0xffffff);
-		quitBg.setDepth(19);
-		quitBg.setInteractive({ useHandCursor: true });
-		this.endGameElements.push(quitBg);
-
-		const quitText = this.scene.add
-			.text(260, 380, "Quit", {
-				fontSize: "24px",
-				fill: "#fff",
-				fontFamily: "Arial",
-			})
-			.setOrigin(0.5)
-			.setInteractive({ useHandCursor: true });
-		quitText.setDepth(FROGGER_CONFIG.UI_DEPTH);
-		this.endGameElements.push(quitText);
-
-		return { retryText, quitText };
+		return { retryText };
 	}
 
 	showWin(score) {
@@ -157,14 +140,14 @@ export class UIManager {
 		scoreText.setDepth(FROGGER_CONFIG.UI_DEPTH);
 		this.endGameElements.push(scoreText);
 
-		const retryBg = this.scene.add.rectangle(140, 380, 100, 40, 0xffff00);
+		const retryBg = this.scene.add.rectangle(200, 380, 100, 40, 0xffff00);
 		retryBg.setStrokeStyle(2, 0xffffff);
 		retryBg.setDepth(19);
 		retryBg.setInteractive({ useHandCursor: true });
 		this.endGameElements.push(retryBg);
 
 		const retryText = this.scene.add
-			.text(140, 380, "Retry", {
+			.text(200, 380, "Retry", {
 				fontSize: "24px",
 				fill: "#000000",
 				fontFamily: "Arial",
@@ -174,24 +157,7 @@ export class UIManager {
 		retryText.setDepth(FROGGER_CONFIG.UI_DEPTH);
 		this.endGameElements.push(retryText);
 
-		const quitBg = this.scene.add.rectangle(260, 380, 100, 40, 0xff0000);
-		quitBg.setStrokeStyle(2, 0xffffff);
-		quitBg.setDepth(19);
-		quitBg.setInteractive({ useHandCursor: true });
-		this.endGameElements.push(quitBg);
-
-		const quitText = this.scene.add
-			.text(260, 380, "Quit", {
-				fontSize: "24px",
-				fill: "#fff",
-				fontFamily: "Arial",
-			})
-			.setOrigin(0.5)
-			.setInteractive({ useHandCursor: true });
-		quitText.setDepth(FROGGER_CONFIG.UI_DEPTH);
-		this.endGameElements.push(quitText);
-
-		return { retryText, quitText };
+		return { retryText };
 	}
 
 	clearEndGameUI() {

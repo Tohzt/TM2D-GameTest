@@ -29,15 +29,10 @@ export class CatchScene extends Phaser.Scene {
 		});
 		this.uiManager = new UIManager(this);
 
-		this.spriteSelector.showSelectionScreen(
-			(spriteKey) => {
-				this.selectedSprite = spriteKey;
-				this.initializeGame();
-			},
-			() => {
-				this.scene.start("MenuScene");
-			}
-		);
+		this.spriteSelector.showSelectionScreen((spriteKey) => {
+			this.selectedSprite = spriteKey;
+			this.initializeGame();
+		});
 
 		this.createGround();
 		this.score = 0;
@@ -158,14 +153,10 @@ export class CatchScene extends Phaser.Scene {
 		this.gameOver = true;
 		this.physics.pause();
 
-		const { retryText, quitText } = this.uiManager.showGameOver(this.score);
+		const { retryText } = this.uiManager.showGameOver(this.score);
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 

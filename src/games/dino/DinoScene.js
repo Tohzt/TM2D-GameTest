@@ -30,15 +30,10 @@ export class DinoScene extends Phaser.Scene {
 		this.uiManager = new UIManager(this);
 		this.obstacleManager = new ObstacleManager(this);
 
-		this.spriteSelector.showSelectionScreen(
-			(spriteKey) => {
-				this.selectedSprite = spriteKey;
-				this.initializeGame();
-			},
-			() => {
-				this.scene.start("MenuScene");
-			}
-		);
+		this.spriteSelector.showSelectionScreen((spriteKey) => {
+			this.selectedSprite = spriteKey;
+			this.initializeGame();
+		});
 
 		this.createGround();
 		this.score = 0;
@@ -171,14 +166,10 @@ export class DinoScene extends Phaser.Scene {
 		this.physics.pause();
 		this.dino.setTint(0xff0000);
 
-		const { retryText, quitText } = this.uiManager.showGameOver(this.score);
+		const { retryText } = this.uiManager.showGameOver(this.score);
 
 		retryText.on("pointerdown", () => {
 			this.restartGame();
-		});
-
-		quitText.on("pointerdown", () => {
-			this.scene.start("MenuScene");
 		});
 	}
 
