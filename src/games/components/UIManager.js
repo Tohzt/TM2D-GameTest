@@ -9,6 +9,7 @@ export class UIManager {
 		this.highScoreText = null;
 		this.startText = null;
 		this.highScore = 0;
+		this.originalHighScore = 0; // Track the original high score before gameplay starts
 		this.endGameElements = [];
 
 		// Load high score from API
@@ -30,6 +31,7 @@ export class UIManager {
 				console.log(`[UIManager] Loaded high score:`, highScore);
 				if (highScore && highScore.score) {
 					this.highScore = highScore.score;
+					this.originalHighScore = highScore.score; // Store the original
 					console.log(`[UIManager] High score set to: ${this.highScore}`);
 				}
 			}
@@ -128,11 +130,11 @@ export class UIManager {
 		this.clearEndGameUI();
 
 		console.log(
-			`[UIManager] Game Over! Score: ${score}, High: ${this.highScore}, Game: ${this.gameId}`
+			`[UIManager] Game Over! Score: ${score}, High: ${this.highScore}, Original High: ${this.originalHighScore}, Game: ${this.gameId}`
 		);
 
-		// Check if this is a new high score
-		const isNewHighScore = score > this.highScore;
+		// Check if this is a new high score compared to the ORIGINAL high score
+		const isNewHighScore = score > this.originalHighScore;
 		let displayTitle = title;
 
 		console.log(`[UIManager] Is new high score: ${isNewHighScore}`);
@@ -140,6 +142,7 @@ export class UIManager {
 		// Update high score if new record
 		if (isNewHighScore) {
 			this.highScore = score;
+			this.originalHighScore = score; // Update the original so next game works correctly
 			displayTitle = "🎉 NEW HIGH SCORE! 🎉";
 			console.log(`[UIManager] Saving new high score to API: ${score}`);
 			// Save to backend API
