@@ -124,6 +124,15 @@ export class DinoScene extends Phaser.Scene {
 			this.isGrounded = true;
 		}
 
+		// Reduce gravity when falling (going down), keep normal gravity when jumping
+		if (this.dinoCollision.body.velocity.y > 0) {
+			// Falling - use much lighter gravity
+			this.dinoCollision.body.setGravityY(DINO_CONFIG.GRAVITY * 0.25);
+		} else {
+			// Jumping - use normal gravity
+			this.dinoCollision.body.setGravityY(DINO_CONFIG.GRAVITY);
+		}
+
 		// Update obstacles and check scoring
 		const scored = this.obstacleManager.update(this.dinoCollision);
 		if (scored) {
