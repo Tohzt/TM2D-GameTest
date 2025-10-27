@@ -33,3 +33,25 @@ export const CATCH_CONFIG = {
 	SPRITE_SPACING: 180,
 	SPRITE_BOX_SIZE: 140,
 };
+
+// Phaser game configuration for React wrapper
+import CatchScene from "./CatchScene.js";
+
+export default {
+	scale: {
+		mode: "FIT",
+		autoCenter: "CENTER_BOTH",
+		width: 400,
+		height: 600,
+	},
+	parent: "game-container",
+	backgroundColor: 0x1e3a5f,
+	physics: {
+		default: "arcade",
+		arcade: {
+			gravity: { y: 0 },
+			debug: false,
+		},
+	},
+	scene: [CatchScene],
+};

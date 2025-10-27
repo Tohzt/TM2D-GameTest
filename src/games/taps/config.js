@@ -20,3 +20,25 @@ export const TAPS_CONFIG = {
 	UI_DEPTH: 20,
 	EFFECTS_DEPTH: 25,
 };
+
+// Phaser game configuration for React wrapper
+import TapsScene from "./TapsScene.js";
+
+export default {
+	scale: {
+		mode: "FIT",
+		autoCenter: "CENTER_BOTH",
+		width: 400,
+		height: 600,
+	},
+	parent: "game-container",
+	backgroundColor: 0xffff00,
+	physics: {
+		default: "arcade",
+		arcade: {
+			gravity: { y: 0 },
+			debug: false,
+		},
+	},
+	scene: [TapsScene],
+};
