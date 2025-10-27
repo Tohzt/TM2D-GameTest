@@ -19,13 +19,18 @@ export class UIManager {
 		try {
 			// Get user ID from API service (set after authentication)
 			const userId = apiService.getUserId();
+			console.log(
+				`[UIManager] Loading high score for game: ${this.gameId}, userId: ${userId}`
+			);
 			if (userId) {
 				const highScore = await apiService.getPersonalHighScore(
 					this.gameId,
 					userId.toString()
 				);
+				console.log(`[UIManager] Loaded high score:`, highScore);
 				if (highScore && highScore.score) {
 					this.highScore = highScore.score;
+					console.log(`[UIManager] High score set to: ${this.highScore}`);
 				}
 			}
 		} catch (error) {
@@ -122,14 +127,21 @@ export class UIManager {
 	showGameOver(title, score, subtitle = null) {
 		this.clearEndGameUI();
 
+		console.log(
+			`[UIManager] Game Over! Score: ${score}, High: ${this.highScore}, Game: ${this.gameId}`
+		);
+
 		// Check if this is a new high score
 		const isNewHighScore = score > this.highScore;
 		let displayTitle = title;
+
+		console.log(`[UIManager] Is new high score: ${isNewHighScore}`);
 
 		// Update high score if new record
 		if (isNewHighScore) {
 			this.highScore = score;
 			displayTitle = "🎉 NEW HIGH SCORE! 🎉";
+			console.log(`[UIManager] Saving new high score to API: ${score}`);
 			// Save to backend API
 			apiService.saveScore(this.gameId, score);
 		}
