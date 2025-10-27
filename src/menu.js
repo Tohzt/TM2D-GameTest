@@ -50,6 +50,12 @@ class MenuScene extends Phaser.Scene {
 				description: "Catch falling sprites!",
 				color: 0x9b59b6,
 			},
+			{
+				name: "Frogger",
+				key: "frogger",
+				description: "Cross the road!",
+				color: 0x228b22,
+			},
 		];
 
 		// Create simple game list
@@ -57,8 +63,8 @@ class MenuScene extends Phaser.Scene {
 	}
 
 	createGamesList(games) {
-		const startY = 180;
-		const gameSpacing = 85;
+		const startY = 170;
+		const gameSpacing = 75;
 		const cardWidth = 360;
 		const cardHeight = 75;
 
@@ -117,6 +123,8 @@ class MenuScene extends Phaser.Scene {
 			this.scene.start("DinoScene");
 		} else if (gameKey === "catch") {
 			this.scene.start("CatchScene");
+		} else if (gameKey === "frogger") {
+			this.scene.start("FroggerScene");
 		}
 	}
 }
