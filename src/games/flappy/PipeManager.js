@@ -1,9 +1,10 @@
+import Phaser from "phaser";
 import { FLAPPY_CONFIG } from "./config.js";
 
 export class PipeManager {
 	constructor(scene) {
 		this.scene = scene;
-		this.pipes = this.scene.physics.add.group();
+		this.pipes = [];
 		this.spawnTimer = null;
 	}
 
@@ -22,17 +23,9 @@ export class PipeManager {
 			FLAPPY_CONFIG.PIPE_HEIGHT,
 			FLAPPY_CONFIG.PIPE_COLOR
 		);
-		this.scene.physics.add.existing(topPipe);
-		topPipe.body.allowGravity = false;
 		topPipe.setStrokeStyle(4, FLAPPY_CONFIG.PIPE_BORDER_COLOR);
-		this.pipes.add(topPipe);
-
-		// Set velocity after a small delay to ensure physics body is ready
-		this.scene.time.delayedCall(10, () => {
-			if (topPipe.body) {
-				topPipe.body.setVelocityX(FLAPPY_CONFIG.PIPE_SPEED);
-			}
-		});
+		topPipe.originalY = topPipeY;
+		this.pipes.push(topPipe);
 
 		const bottomPipeY = gapPosition + gap / 2 + FLAPPY_CONFIG.PIPE_HEIGHT / 2;
 		const bottomPipe = this.scene.add.rectangle(
@@ -42,23 +35,23 @@ export class PipeManager {
 			FLAPPY_CONFIG.PIPE_HEIGHT,
 			FLAPPY_CONFIG.PIPE_COLOR
 		);
-		this.scene.physics.add.existing(bottomPipe);
-		bottomPipe.body.allowGravity = false;
 		bottomPipe.setStrokeStyle(4, FLAPPY_CONFIG.PIPE_BORDER_COLOR);
-		this.pipes.add(bottomPipe);
-
-		// Set velocity after a small delay to ensure physics body is ready
-		this.scene.time.delayedCall(10, () => {
-			if (bottomPipe.body) {
-				bottomPipe.body.setVelocityX(FLAPPY_CONFIG.PIPE_SPEED);
-			}
-		});
+		bottomPipe.originalY = bottomPipeY;
+		this.pipes.push(bottomPipe);
 	}
 
 	update(bird) {
 		let scored = false;
 
-		this.pipes.children.entries.forEach((pipe) => {
+		this.pipes.forEach((pipe) => {
+			// Move pipes to the left
+			pipe.x += FLAPPY_CONFIG.PIPE_SPEED * (1 / 60); // Adjust for frame rate
+
+			// Keep pipes at their original Y position (no falling!)
+			if (pipe.originalY !== undefined) {
+				pipe.y = pipe.originalY;
+			}
+
 			if (pipe.x < bird.x - 30 && !pipe.scored) {
 				pipe.scored = true;
 				if (pipe.y < 300) {
@@ -68,6 +61,11 @@ export class PipeManager {
 
 			if (pipe.x < -100) {
 				pipe.destroy();
+				// Remove from array
+				const index = this.pipes.indexOf(pipe);
+				if (index > -1) {
+					this.pipes.splice(index, 1);
+				}
 			}
 		});
 
@@ -88,7 +86,7 @@ export class PipeManager {
 		if (this.spawnTimer) {
 			this.spawnTimer.remove();
 		}
-		this.pipes.clear(true, true);
-		this.pipes.destroy();
+		this.pipes.forEach((pipe) => pipe.destroy());
+		this.pipes = [];
 	}
 }
