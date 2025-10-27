@@ -6,6 +6,7 @@ class APIService {
 	constructor() {
 		this.initData = null;
 		this.authenticated = false;
+		this.userId = null;
 	}
 
 	// Initialize with Telegram WebApp initData
@@ -38,6 +39,7 @@ class APIService {
 			if (response.ok) {
 				const data = await response.json();
 				this.authenticated = true;
+				this.userId = data.user.telegramId; // Store the user ID
 				console.log("Authenticated successfully:", data.user);
 				return data;
 			} else {
@@ -100,6 +102,11 @@ class APIService {
 			console.error("Error fetching personal high score:", error);
 		}
 		return null;
+	}
+
+	// Get current user's ID
+	getUserId() {
+		return this.userId;
 	}
 
 	// Get leaderboard
