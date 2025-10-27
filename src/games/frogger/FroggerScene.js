@@ -3,6 +3,7 @@ import { FROGGER_CONFIG } from "./config.js";
 import { SpriteSelector } from "../components/SpriteSelector.js";
 import { UIManager } from "./UIManager.js";
 import { VehicleManager } from "./VehicleManager.js";
+import { LogManager } from "./LogManager.js";
 
 export class FroggerScene extends Phaser.Scene {
 	constructor() {
@@ -26,6 +27,7 @@ export class FroggerScene extends Phaser.Scene {
 		});
 		this.uiManager = new UIManager(this);
 		this.vehicleManager = new VehicleManager(this);
+		this.logManager = new LogManager(this);
 
 		this.spriteSelector.showSelectionScreen(
 			(spriteKey) => {
@@ -42,6 +44,7 @@ export class FroggerScene extends Phaser.Scene {
 		this.gameOver = false;
 		this.gameStarted = false;
 		this.selectedSprite = null;
+		this.countdownActive = false;
 	}
 
 	createBackground() {
@@ -73,6 +76,44 @@ export class FroggerScene extends Phaser.Scene {
 			dividerLine.setDepth(FROGGER_CONFIG.GROUND_DEPTH + 1);
 		}
 
+		// Create finish zone at top
+		this.finishZone = this.add.rectangle(
+			200,
+			25,
+			400,
+			50,
+			FROGGER_CONFIG.FINISH_ZONE_COLOR
+		);
+		this.finishZone.setDepth(FROGGER_CONFIG.GROUND_DEPTH);
+
+		// Create water area (4 rows of blue)
+		const waterStartY = 50; // Start right after finish zone
+		const waterHeight = 4 * laneHeight; // 4 lanes of water (200 pixels)
+
+		const waterArea = this.add.rectangle(
+			200,
+			waterStartY + waterHeight / 2,
+			400,
+			waterHeight,
+			FROGGER_CONFIG.WATER_COLOR
+		);
+		waterArea.setDepth(FROGGER_CONFIG.GROUND_DEPTH);
+
+		// Store water area bounds for collision detection
+		this.waterTop = waterStartY;
+		this.waterBottom = waterStartY + waterHeight;
+
+		// Create one row of grass after water, before roads
+		const grassStartY = 250; // After water ends at y=250
+		const grassArea = this.add.rectangle(
+			200,
+			grassStartY + laneHeight / 2,
+			400,
+			laneHeight,
+			FROGGER_CONFIG.SAFE_ZONE_COLOR
+		);
+		grassArea.setDepth(FROGGER_CONFIG.GROUND_DEPTH);
+
 		// Create safe start zone at bottom
 		this.ground = this.add.rectangle(
 			200,
@@ -83,43 +124,36 @@ export class FroggerScene extends Phaser.Scene {
 		);
 		this.ground.setDepth(FROGGER_CONFIG.GROUND_DEPTH);
 
-		// Create finish zone at top
-		this.finishZone = this.add.rectangle(
-			200,
-			50,
-			400,
-			100,
-			FROGGER_CONFIG.FINISH_ZONE_COLOR
-		);
-		this.finishZone.setDepth(FROGGER_CONFIG.GROUND_DEPTH);
-
-		// DEBUG: Add grid overlay for testing
-		this.drawGrid();
+		// Grid overlay disabled for cleaner gameplay
+		// this.drawGrid();
 	}
 
 	drawGrid() {
+		// Grid overlay disabled
+		/*
 		const gridSize = FROGGER_CONFIG.GRID_SIZE;
 		const worldWidth = FROGGER_CONFIG.WORLD_WIDTH;
 		const worldHeight = FROGGER_CONFIG.WORLD_HEIGHT;
-
+		
 		// Create a graphics object for the grid
 		const gridGraphics = this.add.graphics();
 		gridGraphics.setDepth(FROGGER_CONFIG.GROUND_DEPTH + 2);
 		gridGraphics.lineStyle(1, 0xffffff, 0.3);
-
+		
 		// Draw vertical lines
 		for (let x = 0; x <= worldWidth; x += gridSize) {
 			gridGraphics.moveTo(x, 0);
 			gridGraphics.lineTo(x, worldHeight);
 		}
-
+		
 		// Draw horizontal lines
 		for (let y = 0; y <= worldHeight; y += gridSize) {
 			gridGraphics.moveTo(0, y);
 			gridGraphics.lineTo(worldWidth, y);
 		}
-
+		
 		gridGraphics.strokePath();
+		*/
 	}
 
 	initializeGame() {
@@ -180,6 +214,9 @@ export class FroggerScene extends Phaser.Scene {
 		// Start vehicle spawning
 		this.vehicleManager.startSpawning();
 
+		// Start log spawning
+		this.logManager.startSpawning();
+
 		// Set up collision detection
 		this.vehicleCollider = this.physics.add.overlap(
 			this.frogCollision,
@@ -189,8 +226,46 @@ export class FroggerScene extends Phaser.Scene {
 			this
 		);
 
+		// Set up log collision detection
+		this.logCollider = this.physics.add.overlap(
+			this.frogCollision,
+			this.logManager.logs,
+			this.onLogCollision,
+			null,
+			this
+		);
+
 		// Set up input for directional movement
 		this.input.on("pointerdown", this.handlePointerDown, this);
+
+		// Track if frog is riding a log
+		this.frog.ridingLog = null;
+	}
+
+	onLogCollision() {
+		// Frog landed on a log - check which log
+		const frogBounds = this.frogCollision.getBounds();
+
+		this.logManager.logs.children.entries.forEach((log) => {
+			if (!log || !log.active) return;
+
+			const logBounds = log.getBounds();
+
+			// Check if frog is overlapping with the log
+			if (Phaser.Geom.Rectangle.Intersection(frogBounds, logBounds)) {
+				// Check if frog center is on the log (not hanging off edges)
+				const overlap = Phaser.Geom.Rectangle.Intersection(
+					frogBounds,
+					logBounds
+				);
+				// If there's ANY meaningful overlap, frog is on the log
+				if (overlap && overlap.width > frogBounds.width * 0.15) {
+					// Frog is riding this log
+					this.frog.ridingLog = log;
+					return;
+				}
+			}
+		});
 	}
 
 	hitVehicle() {
@@ -206,6 +281,12 @@ export class FroggerScene extends Phaser.Scene {
 		if (!this.gameStarted) {
 			this.startGame();
 			return;
+		}
+
+		// Allow jumping off logs by clearing riding state when attempting to move
+		if (this.frog.ridingLog) {
+			// User wants to jump off - clear the riding state
+			this.frog.ridingLog = null;
 		}
 
 		// Calculate direction based on pointer position relative to frog
@@ -235,10 +316,75 @@ export class FroggerScene extends Phaser.Scene {
 	startGame() {
 		this.gameStarted = true;
 		this.uiManager.hideStartText();
+
+		// Start 3 second countdown before allowing player movement
+		this.startCountdown();
+	}
+
+	startCountdown() {
+		let countdown = 3;
+		this.countdownActive = true; // Disable movement during countdown
+
+		const countdownText = this.add.text(200, 300, "3", {
+			fontSize: "72px",
+			fill: "#ffff00",
+			fontFamily: "Arial",
+			fontStyle: "bold",
+		});
+		countdownText.setOrigin(0.5);
+		countdownText.setDepth(FROGGER_CONFIG.UI_DEPTH);
+
+		// Disable input during countdown
+		this.input.on("pointerdown", () => {
+			// Block all input during countdown
+		});
+
+		// Countdown animation
+		const countdownEvent = this.time.addEvent({
+			delay: 1000, // 1 second intervals
+			callback: () => {
+				countdown--;
+
+				if (countdown > 0) {
+					countdownText.setText(countdown.toString());
+					// Add scale animation
+					countdownText.setScale(1.2);
+					this.tweens.add({
+						targets: countdownText,
+						scale: 1,
+						duration: 200,
+					});
+				} else {
+					// Countdown complete - show "GO!"
+					countdownText.setText("GO!");
+					countdownText.setTint(0x00ff00); // Use setTint instead of setFill
+					this.tweens.add({
+						targets: countdownText,
+						alpha: 0,
+						scale: 2,
+						duration: 500,
+						onComplete: () => {
+							countdownText.destroy();
+							// Re-enable input and allow movement
+							this.countdownActive = false;
+							this.input.off("pointerdown");
+							this.input.on("pointerdown", this.handlePointerDown, this);
+						},
+					});
+				}
+			},
+			repeat: 3,
+		});
 	}
 
 	moveLeft() {
-		if (this.gameOver || !this.gameStarted) return;
+		if (
+			this.gameOver ||
+			!this.gameStarted ||
+			this.frog.ridingLog ||
+			this.countdownActive
+		)
+			return;
 
 		const newX = this.frog.x - FROGGER_CONFIG.GRID_SIZE;
 		if (newX >= FROGGER_CONFIG.GRID_SIZE / 2) {
@@ -251,7 +397,13 @@ export class FroggerScene extends Phaser.Scene {
 	}
 
 	moveRight() {
-		if (this.gameOver || !this.gameStarted) return;
+		if (
+			this.gameOver ||
+			!this.gameStarted ||
+			this.frog.ridingLog ||
+			this.countdownActive
+		)
+			return;
 
 		const newX = this.frog.x + FROGGER_CONFIG.GRID_SIZE;
 		if (newX <= FROGGER_CONFIG.WORLD_WIDTH - FROGGER_CONFIG.GRID_SIZE / 2) {
@@ -264,7 +416,13 @@ export class FroggerScene extends Phaser.Scene {
 	}
 
 	moveUp() {
-		if (this.gameOver || !this.gameStarted) return;
+		if (
+			this.gameOver ||
+			!this.gameStarted ||
+			this.frog.ridingLog ||
+			this.countdownActive
+		)
+			return;
 
 		const newY = this.frog.y - FROGGER_CONFIG.GRID_SIZE;
 		if (newY >= FROGGER_CONFIG.GRID_SIZE / 2) {
@@ -277,7 +435,13 @@ export class FroggerScene extends Phaser.Scene {
 	}
 
 	moveDown() {
-		if (this.gameOver || !this.gameStarted) return;
+		if (
+			this.gameOver ||
+			!this.gameStarted ||
+			this.frog.ridingLog ||
+			this.countdownActive
+		)
+			return;
 
 		const newY = this.frog.y + FROGGER_CONFIG.GRID_SIZE;
 		if (newY <= FROGGER_CONFIG.WORLD_HEIGHT - FROGGER_CONFIG.GRID_SIZE / 2) {
@@ -294,9 +458,92 @@ export class FroggerScene extends Phaser.Scene {
 			return;
 		}
 
+		// Check for win condition
+		this.checkWin();
+
 		// Update vehicles
 		if (this.vehicleManager) {
 			this.vehicleManager.update(this.frogCollision);
+		}
+
+		// Update logs and handle frog riding
+		if (this.logManager) {
+			this.logManager.update(this.frog, this.frogCollision, this.frogBorder);
+		}
+
+		// Check if frog is in water (and not on a log)
+		this.checkWaterCollision();
+	}
+
+	checkWin() {
+		const frogY = this.frog.y;
+
+		// Check if frog reached the finish zone (top area, y=0 to y=50)
+		if (frogY >= 0 && frogY <= 50) {
+			// Frog reached the finish! Win!
+			this.winGame();
+		}
+	}
+
+	winGame() {
+		if (this.gameOver || !this.gameStarted) return;
+
+		this.gameOver = true;
+		this.score += 10; // Award points for completing
+		this.uiManager.updateScore(this.score);
+
+		// Pause the game
+		this.physics.pause();
+
+		const { retryText, quitText } = this.uiManager.showWin(this.score);
+
+		retryText.on("pointerdown", () => {
+			this.restartGame();
+		});
+
+		quitText.on("pointerdown", () => {
+			this.scene.start("MenuScene");
+		});
+	}
+
+	checkWaterCollision() {
+		const frogY = this.frog.y;
+
+		// Check if frog is in the water zone (y=50 to y=250)
+		if (frogY >= this.waterTop && frogY <= this.waterBottom) {
+			// Check if currently riding a log or overlapping with any log
+			let isOnLog = false;
+
+			if (this.frog.ridingLog && this.frog.ridingLog.active) {
+				isOnLog = true;
+			} else {
+				// Do a quick check for overlap with any log in the current frame
+				const frogBounds = this.frogCollision.getBounds();
+				this.logManager.logs.children.entries.forEach((log) => {
+					if (!log || !log.active) return;
+
+					const logBounds = log.getBounds();
+					const overlap = Phaser.Geom.Rectangle.Intersection(
+						frogBounds,
+						logBounds
+					);
+
+					// Very forgiving - even 20% overlap counts as "on the log"
+					if (overlap && overlap.width > frogBounds.width * 0.2) {
+						isOnLog = true;
+						// Set riding log for this frame
+						this.frog.ridingLog = log;
+					}
+				});
+			}
+
+			if (!isOnLog) {
+				// Frog is in water and not on any log - game over!
+				this.hitObstacle();
+			}
+		} else {
+			// Not in water anymore, clear riding state
+			this.frog.ridingLog = null;
 		}
 	}
 
@@ -321,7 +568,7 @@ export class FroggerScene extends Phaser.Scene {
 		this.uiManager.clearEndGameUI();
 
 		this.gameOver = false;
-		this.gameStarted = false;
+		this.gameStarted = true; // Keep as started since we're restarting
 		this.score = 0;
 		this.uiManager.resetScore();
 
@@ -333,6 +580,7 @@ export class FroggerScene extends Phaser.Scene {
 
 		this.frog.x = FROGGER_CONFIG.FROG_START_X + gridOffsetX;
 		this.frog.y = FROGGER_CONFIG.FROG_START_Y + gridOffsetY;
+		this.frog.ridingLog = null; // Clear riding state
 
 		this.frogCollision.x = FROGGER_CONFIG.FROG_START_X + gridOffsetX;
 		this.frogCollision.y = FROGGER_CONFIG.FROG_START_Y + gridOffsetY;
@@ -353,14 +601,20 @@ export class FroggerScene extends Phaser.Scene {
 		if (this.vehicleManager) {
 			this.vehicleManager.destroy();
 		}
+		if (this.logManager) {
+			this.logManager.destroy();
+		}
 		if (this.vehicleCollider) {
 			this.vehicleCollider.destroy();
 		}
+		if (this.logCollider) {
+			this.logCollider.destroy();
+		}
 
 		this.vehicleManager = new VehicleManager(this);
-		this.vehicleManager.startSpawning();
+		this.logManager = new LogManager(this);
 
-		// Recreate collision detection
+		// Recreate collision detection first
 		this.vehicleCollider = this.physics.add.overlap(
 			this.frogCollision,
 			this.vehicleManager.vehicles,
@@ -368,6 +622,28 @@ export class FroggerScene extends Phaser.Scene {
 			null,
 			this
 		);
+
+		this.logCollider = this.physics.add.overlap(
+			this.frogCollision,
+			this.logManager.logs,
+			this.onLogCollision,
+			null,
+			this
+		);
+
+		// Start spawning and countdown
+		this.vehicleManager.startSpawning();
+		this.logManager.startSpawning();
+
+		// Reset riding state
+		this.frog.ridingLog = null;
+
+		// Reset countdown flag and start countdown
+		this.countdownActive = false;
+		this.startCountdown();
+
+		// Resume physics
+		this.physics.resume();
 	}
 }
 
