@@ -82,9 +82,7 @@ export class UIManager {
 		if (score > this.highScore) {
 			this.highScore = score;
 			this.updateHighScore(score);
-
-			// Save to backend API
-			apiService.saveScore(this.gameId, score);
+			// Note: We don't save here anymore - saves happen only at game end
 		}
 	}
 
@@ -122,6 +120,11 @@ export class UIManager {
 	}
 
 	showGameOver(title, score, subtitle = null) {
+		// Save to backend API only at game end if it's a new high score
+		if (score > this.highScore) {
+			apiService.saveScore(this.gameId, score);
+		}
+
 		this.clearEndGameUI();
 
 		const background = this.scene.add.rectangle(
