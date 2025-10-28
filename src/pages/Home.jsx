@@ -31,6 +31,12 @@ const games = [
 		description: "Tap the sprites, avoid red!",
 		color: "#ffff00",
 	},
+	{
+		id: "hockey",
+		name: "Air Hockey",
+		description: "Click and drag to play!",
+		color: "#00bfff",
+	},
 ];
 
 function Home() {

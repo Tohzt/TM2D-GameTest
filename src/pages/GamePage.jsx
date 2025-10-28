@@ -32,6 +32,9 @@ function GamePage() {
           case 'taps':
             config = (await import('../games/taps/config.js')).default;
             break;
+          case 'hockey':
+            config = (await import('../games/hockey/config.js')).default;
+            break;
           default:
             throw new Error('Game not found');
         }
