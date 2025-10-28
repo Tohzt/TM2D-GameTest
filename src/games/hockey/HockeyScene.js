@@ -53,6 +53,8 @@ export class HockeyScene extends Phaser.Scene {
 		this.waitingForGoal = false;
 		this.lastCollisionTime = 0;
 		this.collisionCooldown = 100; // ms between collisions
+		this.nextServeSide = null; // null = random, 'top' or 'bottom'
+		this.puckVelocity = { x: 0, y: 0 }; // Track if puck is moving
 	}
 
 	initializeGame() {
@@ -207,8 +209,11 @@ export class HockeyScene extends Phaser.Scene {
 		this.input.on("pointerdown", (pointer) => {
 			if (!this.gameStarted && !this.gameOver) {
 				this.startGame();
+				return;
 			}
+
 			if (!this.gameOver && this.gameStarted) {
+				// Handle paddle movement
 				// Determine which paddle to control based on click position
 				if (pointer.y < 300) {
 					// Top half - control top paddle
@@ -262,13 +267,63 @@ export class HockeyScene extends Phaser.Scene {
 		this.uiManager.hideStartText();
 		this.matchText.destroy();
 
-		// Start puck movement
-		const angle = Phaser.Math.Between(-20, 20) * (Math.PI / 180);
-		const speed = 250;
+		// Position puck on blue line, don't start it moving yet
+		this.servePuck();
+	}
+
+	servePuck() {
+		// Determine which side to serve from
+		let serveSide = this.nextServeSide;
+		if (!serveSide) {
+			// Random for first serve
+			serveSide = Math.random() < 0.5 ? "top" : "bottom";
+		}
+
+		// Position puck on the blue line of the serving side
+		if (serveSide === "top") {
+			// Position on top blue line (y=200)
+			this.puck.x = 200;
+			this.puck.y = 200;
+		} else {
+			// Position on bottom blue line (y=400)
+			this.puck.x = 200;
+			this.puck.y = 400;
+		}
+
+		this.puck.body.setVelocity(0, 0);
+		this.puck.body.updateFromGameObject();
+		this.puckServed = false; // Flag to track if puck has been served
+	}
+
+	checkPuckServed() {
+		return !this.puckServed;
+	}
+
+	servePuckWithVelocity() {
+		// Determine which side we're serving from
+		let serveSide = this.nextServeSide;
+		if (!serveSide) {
+			serveSide = this.puck.y === 200 ? "top" : "bottom";
+		}
+
+		// Serve towards the other player's side
+		let targetY, startSpeed;
+		if (serveSide === "top") {
+			targetY = 400; // Serve towards bottom
+			startSpeed = 250;
+		} else {
+			targetY = 200; // Serve towards top
+			startSpeed = -250;
+		}
+
+		// Calculate angle towards other side
+		const angle = Phaser.Math.Between(-30, 30) * (Math.PI / 180);
 		this.puck.body.setVelocity(
-			Math.sin(angle) * speed,
-			Math.cos(angle) * speed
+			Math.sin(angle) * startSpeed,
+			-Math.abs(startSpeed) * Math.cos(angle)
 		);
+
+		this.puckServed = true;
 	}
 
 	update() {
@@ -360,15 +415,27 @@ export class HockeyScene extends Phaser.Scene {
 			puck.x += Math.cos(angle) * overlap;
 			puck.y += Math.sin(angle) * overlap;
 
-			// Reflect velocity
-			const normalX = dx1 / distance1;
-			const normalY = dy1 / distance1;
-			const dot =
-				puck.body.velocity.x * normalX + puck.body.velocity.y * normalY;
-			puck.body.setVelocity(
-				puck.body.velocity.x - 2 * dot * normalX,
-				puck.body.velocity.y - 2 * dot * normalY
-			);
+			// If puck is stationary, give it initial velocity
+			if (puck.body.velocity.x === 0 && puck.body.velocity.y === 0) {
+				// Paddle is moving, so give puck velocity based on paddle movement direction
+				const defaultSpeed = 300;
+				const randomAngle = Phaser.Math.Between(-45, 45) * (Math.PI / 180);
+				puck.body.setVelocity(
+					Math.sin(randomAngle) * defaultSpeed,
+					-Math.cos(randomAngle) * defaultSpeed
+				);
+				this.puckServed = true;
+			} else {
+				// Reflect velocity for moving puck
+				const normalX = dx1 / distance1;
+				const normalY = dy1 / distance1;
+				const dot =
+					puck.body.velocity.x * normalX + puck.body.velocity.y * normalY;
+				puck.body.setVelocity(
+					puck.body.velocity.x - 2 * dot * normalX,
+					puck.body.velocity.y - 2 * dot * normalY
+				);
+			}
 			return; // Only process one collision per frame
 		}
 
@@ -387,15 +454,27 @@ export class HockeyScene extends Phaser.Scene {
 			puck.x += Math.cos(angle) * overlap;
 			puck.y += Math.sin(angle) * overlap;
 
-			// Reflect velocity
-			const normalX = dx2 / distance2;
-			const normalY = dy2 / distance2;
-			const dot =
-				puck.body.velocity.x * normalX + puck.body.velocity.y * normalY;
-			puck.body.setVelocity(
-				puck.body.velocity.x - 2 * dot * normalX,
-				puck.body.velocity.y - 2 * dot * normalY
-			);
+			// If puck is stationary, give it initial velocity
+			if (puck.body.velocity.x === 0 && puck.body.velocity.y === 0) {
+				// Paddle is moving, so give puck velocity based on paddle movement direction
+				const defaultSpeed = 300;
+				const randomAngle = Phaser.Math.Between(-45, 45) * (Math.PI / 180);
+				puck.body.setVelocity(
+					Math.sin(randomAngle) * defaultSpeed,
+					Math.cos(randomAngle) * defaultSpeed
+				);
+				this.puckServed = true;
+			} else {
+				// Reflect velocity for moving puck
+				const normalX = dx2 / distance2;
+				const normalY = dy2 / distance2;
+				const dot =
+					puck.body.velocity.x * normalX + puck.body.velocity.y * normalY;
+				puck.body.setVelocity(
+					puck.body.velocity.x - 2 * dot * normalX,
+					puck.body.velocity.y - 2 * dot * normalY
+				);
+			}
 		}
 	}
 
@@ -423,6 +502,11 @@ export class HockeyScene extends Phaser.Scene {
 		} else if (this.scores.top >= HOCKEY_CONFIG.MAX_SCORE) {
 			this.endMatch("top");
 		} else {
+			// Set next serve to be on the scoring player's side
+			// If bottom (green) scores, next serve is on top (red) side
+			// If top (red) scores, next serve is on bottom (green) side
+			this.nextServeSide = scorer === "bottom" ? "top" : "bottom";
+
 			// Reset puck position after delay
 			this.time.delayedCall(HOCKEY_CONFIG.RESET_DELAY, () => {
 				this.resetPuck();
@@ -431,24 +515,8 @@ export class HockeyScene extends Phaser.Scene {
 	}
 
 	resetPuck() {
-		// Stop and reset puck to center
-		this.puck.body.setVelocity(0, 0);
-		this.puck.x = HOCKEY_CONFIG.PUCK_START_X;
-		this.puck.y = HOCKEY_CONFIG.PUCK_START_Y;
-		this.puck.body.updateFromGameObject();
-
-		// Randomize initial direction after brief pause
-		this.time.delayedCall(300, () => {
-			if (this.puck && !this.waitingForGoal) {
-				const angle = Phaser.Math.Between(-20, 20) * (Math.PI / 180);
-				const speed = 250;
-				this.puck.body.setVelocity(
-					Math.sin(angle) * speed,
-					Math.cos(angle) * speed
-				);
-			}
-		});
-
+		// Serve puck on the appropriate side
+		this.servePuck();
 		this.waitingForGoal = false;
 	}
 
