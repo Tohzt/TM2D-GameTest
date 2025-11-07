@@ -1,43 +1,13 @@
 import { Link } from "react-router-dom";
+import { Hamburger } from "lucide-react";
+import GameLibrary from "../games/index.js";
 
-const games = [
-	{
-		id: "catch",
-		name: "Catch",
-		description: "Catch falling objects!",
-		color: "#9b59b6",
-	},
-	{
-		id: "dino",
-		name: "Dino Run",
-		description: "Jump over obstacles!",
-		color: "#ff6600",
-	},
-	{
-		id: "flappy",
-		name: "Flappy Bird",
-		description: "Tap to fly!",
-		color: "#4ec0ca",
-	},
-	{
-		id: "frogger",
-		name: "Frogger",
-		description: "Cross the road!",
-		color: "#228b22",
-	},
-	{
-		id: "taps",
-		name: "Don't Tap Red!",
-		description: "Tap the sprites, avoid red!",
-		color: "#ffff00",
-	},
-	{
-		id: "hockey",
-		name: "Air Hockey",
-		description: "Click and drag to play!",
-		color: "#00bfff",
-	},
-];
+const games = GameLibrary.map((game) => ({
+	id: game.id,
+	name: game.name,
+	description: game.description,
+	color: game.color,
+}));
 
 function Home() {
 	return (
@@ -50,6 +20,14 @@ function Home() {
 				color: "white",
 			}}
 		>
+			<div className="flex flex-row items-center justify-between w-full h-10 p-2 bg-red-500">
+				<Hamburger
+					className="h-6 w-6 text-white"
+					onClick={() => {
+						WebApp.openMenu();
+					}}
+				/>
+			</div>
 			<div
 				style={{
 					padding: "20px 20px 10px 20px",
