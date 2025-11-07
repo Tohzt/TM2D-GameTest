@@ -16,6 +16,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@tonconnect/ui-react": "^2.3.1",
     "@twa-dev/sdk": "^8.0.2",
     "lucide-react": "^0.552.0",
     "phaser": "^3.90.0",

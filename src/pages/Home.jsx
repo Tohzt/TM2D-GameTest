@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Hamburger } from "lucide-react";
 import GameLibrary from "../games/index.js";
+import MenuDrawer from "../components/MenuDrawer.jsx";
 
 const games = GameLibrary.map((game) => ({
 	id: game.id,
@@ -10,33 +12,27 @@ const games = GameLibrary.map((game) => ({
 }));
 
 function Home() {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+	const closeMenu = () => setIsMenuOpen(false);
+
 	return (
-		<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-				height: "100vh",
-				background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-				color: "white",
-			}}
-		>
-			<div className="flex flex-row items-center justify-between w-full h-10 p-2 bg-red-500">
-				<Hamburger
-					className="h-6 w-6 text-white"
-					onClick={() => {
-						WebApp.openMenu();
-					}}
-				/>
-			</div>
-			<div
-				style={{
-					padding: "20px 20px 10px 20px",
-					textAlign: "center",
-				}}
-			>
-				<h1 style={{ margin: 0, fontSize: "48px", fontWeight: "bold" }}>
-					TM2D Games
-				</h1>
+		<div className="flex flex-col h-screen p-0 m-0 bg-gradient-to-b from-blue-500 to-purple-500 text-white relative overflow-hidden">
+			<MenuDrawer isOpen={isMenuOpen} onClose={closeMenu} />
+
+			<div className="flex flex-row items-center justify-end w-full p-2 bg-[#55556690]">
+				<div className="w-full flex flex-row items-center justify-center">
+					<h1 className="text-2xl font-bold">TooMuch2Do</h1>
+				</div>
+				<button
+					onClick={toggleMenu}
+					title="Open menu"
+					aria-label="Open menu"
+					className="p-2 rounded-lg hover:bg-white/20 transition-colors cursor-pointer"
+				>
+					<Hamburger className="h-6 w-6 text-gray-300 hover:text-white" />
+				</button>
 			</div>
 
 			<div
