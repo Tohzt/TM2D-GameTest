@@ -24,3 +24,30 @@ body {
 	justify-content: center;
 	align-items: center;
 }
+
+/* Override TonConnectButton default styles */
+#ton-connect-button button {
+	all: unset !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	width: 100% !important;
+	color: inherit !important;
+	font-weight: inherit !important;
+	font-size: inherit !important;
+	font-family: inherit !important;
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	box-shadow: none !important;
+	border-radius: 0 !important;
+	text-align: inherit !important;
+	line-height: inherit !important;
+}
+
+/* Hide or reset any icons/images inside */
+/* #ton-connect-button img,
+#ton-connect-button svg {
+	display: none !important;
+} */

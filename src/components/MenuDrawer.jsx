@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
 import { X } from "lucide-react";
+import WalletConnect from "./WalletConnect";
+import { useTonAddress } from "@tonconnect/ui-react";
 
 function MenuDrawer({ isOpen, onClose }) {
+	const userHasWallet = useTonAddress();
+
 	return (
 		<>
 			{/* Backdrop */}
@@ -42,6 +46,7 @@ function MenuDrawer({ isOpen, onClose }) {
 						>
 							Home
 						</Link>
+
 						<Link
 							to="/"
 							onClick={onClose}
@@ -49,16 +54,23 @@ function MenuDrawer({ isOpen, onClose }) {
 						>
 							Games
 						</Link>
+
+						{userHasWallet && (
+							<Link
+								to="/my-wallet"
+								onClick={onClose}
+								className="px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white font-medium"
+							>
+								My Wallet
+							</Link>
+						)}
+
 						{/* Add more menu items here */}
 						<div className="mt-auto pt-4 border-t border-white/20 flex flex-col gap-2">
-							<button
-								className="w-full px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white font-medium text-left"
-								onClick={() => {}}
-								aria-label="Connect wallet"
-								title="Connect wallet"
-							>
-								Connect Wallet
-							</button>
+							<div className="w-full px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white font-medium text-left">
+								<WalletConnect />
+							</div>
+
 							<button
 								className="w-full px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white font-medium text-left"
 								onClick={() => {
