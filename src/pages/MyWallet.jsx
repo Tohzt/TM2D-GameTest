@@ -24,12 +24,18 @@ function MyWallet() {
 		setLoadingNfts(true);
 		setNftError(null);
 		try {
-			// Using TON API to fetch NFTs
-			// Remove ':' from address if present (user-friendly format)
-			const cleanAddress = address.replace(/:/g, "");
+			// TON API expects address in base64url format or raw format
+			// Try multiple address formats
+			let apiAddress = address;
 
+			// If it's user-friendly format (with colons), remove them
+			if (address.includes(":")) {
+				apiAddress = address.replace(/:/g, "");
+			}
+
+			// Try the TON API endpoint
 			const response = await fetch(
-				`https://tonapi.io/v2/accounts/${cleanAddress}/nfts?limit=1000`,
+				`https://tonapi.io/v2/accounts/${apiAddress}/nfts?limit=1000`,
 				{
 					headers: {
 						Accept: "application/json",
@@ -41,13 +47,49 @@ function MyWallet() {
 				const data = await response.json();
 				setNfts(data.nft_items || []);
 			} else {
-				const errorText = await response.text();
-				console.error("NFT API error:", response.status, errorText);
-				setNftError("Failed to fetch NFTs");
+				let errorData;
+				try {
+					errorData = await response.json();
+				} catch {
+					errorData = { error: await response.text() };
+				}
+				console.error("NFT API error:", {
+					status: response.status,
+					statusText: response.statusText,
+					error: errorData,
+					addressUsed: apiAddress,
+					originalAddress: address,
+				});
+
+				// Try alternative endpoint or format
+				if (response.status === 400 || response.status === 404) {
+					// Try with user-friendly address format
+					const altAddress =
+						userFriendlyAddress?.replace(/:/g, "") || rawAddress;
+					if (altAddress && altAddress !== apiAddress) {
+						console.log("Trying alternative address format:", altAddress);
+						const altResponse = await fetch(
+							`https://tonapi.io/v2/accounts/${altAddress}/nfts?limit=1000`,
+							{
+								headers: {
+									Accept: "application/json",
+								},
+							}
+						);
+
+						if (altResponse.ok) {
+							const altData = await altResponse.json();
+							setNfts(altData.nft_items || []);
+							return;
+						}
+					}
+				}
+
+				setNftError(`Failed to fetch NFTs (${response.status})`);
 			}
 		} catch (error) {
 			console.error("Error fetching NFTs:", error);
-			setNftError("Error loading NFTs");
+			setNftError(`Error loading NFTs: ${error.message}`);
 		} finally {
 			setLoadingNfts(false);
 		}
@@ -284,31 +326,81 @@ function MyWallet() {
 							border: "2px solid rgba(255, 255, 255, 0.3)",
 						}}
 					>
-						<h2
+						<div
 							style={{
-								margin: "0 0 16px 0",
-								fontSize: "18px",
-								fontWeight: "600",
-								opacity: 0.9,
+								display: "flex",
+								justifyContent: "space-between",
+								alignItems: "center",
+								marginBottom: "16px",
 							}}
 						>
-							NFTs ({nfts.length})
-						</h2>
+							<h2
+								style={{
+									margin: 0,
+									fontSize: "18px",
+									fontWeight: "600",
+									opacity: 0.9,
+								}}
+							>
+								NFTs ({nfts.length})
+							</h2>
+							{rawAddress && (
+								<button
+									onClick={() => fetchNFTs(rawAddress)}
+									className="px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white text-sm"
+									disabled={loadingNfts}
+								>
+									{loadingNfts ? "Loading..." : "Refresh"}
+								</button>
+							)}
+						</div>
 						{loadingNfts ? (
 							<p style={{ opacity: 0.7, textAlign: "center", padding: "20px" }}>
 								Loading NFTs...
 							</p>
 						) : nftError ? (
-							<p
-								style={{
-									opacity: 0.7,
-									color: "#ff6b6b",
-									textAlign: "center",
-									padding: "20px",
-								}}
-							>
-								{nftError}
-							</p>
+							<div style={{ textAlign: "center", padding: "20px" }}>
+								<p
+									style={{
+										opacity: 0.7,
+										color: "#ff6b6b",
+										marginBottom: "12px",
+									}}
+								>
+									{nftError}
+								</p>
+								<details style={{ marginTop: "12px", textAlign: "left" }}>
+									<summary
+										style={{
+											fontSize: "12px",
+											opacity: 0.7,
+											cursor: "pointer",
+										}}
+									>
+										Debug Info
+									</summary>
+									<div
+										style={{
+											marginTop: "8px",
+											fontSize: "11px",
+											fontFamily: "monospace",
+											opacity: 0.8,
+										}}
+									>
+										<p>User-friendly: {userFriendlyAddress || "N/A"}</p>
+										<p>Raw: {rawAddress || "N/A"}</p>
+										<p
+											style={{
+												marginTop: "8px",
+												fontSize: "10px",
+												opacity: 0.6,
+											}}
+										>
+											Check browser console for detailed error logs
+										</p>
+									</div>
+								</details>
+							</div>
 						) : nfts.length === 0 ? (
 							<p style={{ opacity: 0.7, textAlign: "center", padding: "20px" }}>
 								No NFTs found in this wallet
