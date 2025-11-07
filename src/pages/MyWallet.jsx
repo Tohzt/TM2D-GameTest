@@ -1,13 +1,57 @@
 import { useTonWallet, useTonAddress } from "@tonconnect/ui-react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function MyWallet() {
 	const wallet = useTonWallet();
 	const userFriendlyAddress = useTonAddress();
 	const rawAddress = useTonAddress(false);
 	const [copied, setCopied] = useState(false);
+	const [nfts, setNfts] = useState([]);
+	const [loadingNfts, setLoadingNfts] = useState(false);
+	const [nftError, setNftError] = useState(null);
+
+	useEffect(() => {
+		if (rawAddress) {
+			fetchNFTs(rawAddress);
+		}
+	}, [rawAddress]);
+
+	const fetchNFTs = async (address) => {
+		if (!address) return;
+
+		setLoadingNfts(true);
+		setNftError(null);
+		try {
+			// Using TON API to fetch NFTs
+			// Remove ':' from address if present (user-friendly format)
+			const cleanAddress = address.replace(/:/g, "");
+
+			const response = await fetch(
+				`https://tonapi.io/v2/accounts/${cleanAddress}/nfts?limit=1000`,
+				{
+					headers: {
+						Accept: "application/json",
+					},
+				}
+			);
+
+			if (response.ok) {
+				const data = await response.json();
+				setNfts(data.nft_items || []);
+			} else {
+				const errorText = await response.text();
+				console.error("NFT API error:", response.status, errorText);
+				setNftError("Failed to fetch NFTs");
+			}
+		} catch (error) {
+			console.error("Error fetching NFTs:", error);
+			setNftError("Error loading NFTs");
+		} finally {
+			setLoadingNfts(false);
+		}
+	};
 
 	const copyAddress = () => {
 		if (userFriendlyAddress) {
@@ -228,6 +272,146 @@ function MyWallet() {
 								</div>
 							)}
 						</div>
+					</div>
+
+					{/* NFTs Card */}
+					<div
+						style={{
+							padding: "24px",
+							background: "rgba(255, 255, 255, 0.2)",
+							borderRadius: "15px",
+							marginBottom: "20px",
+							border: "2px solid rgba(255, 255, 255, 0.3)",
+						}}
+					>
+						<h2
+							style={{
+								margin: "0 0 16px 0",
+								fontSize: "18px",
+								fontWeight: "600",
+								opacity: 0.9,
+							}}
+						>
+							NFTs ({nfts.length})
+						</h2>
+						{loadingNfts ? (
+							<p style={{ opacity: 0.7, textAlign: "center", padding: "20px" }}>
+								Loading NFTs...
+							</p>
+						) : nftError ? (
+							<p
+								style={{
+									opacity: 0.7,
+									color: "#ff6b6b",
+									textAlign: "center",
+									padding: "20px",
+								}}
+							>
+								{nftError}
+							</p>
+						) : nfts.length === 0 ? (
+							<p style={{ opacity: 0.7, textAlign: "center", padding: "20px" }}>
+								No NFTs found in this wallet
+							</p>
+						) : (
+							<div
+								style={{
+									display: "grid",
+									gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+									gap: "16px",
+								}}
+							>
+								{nfts.map((nft, index) => {
+									const imageUrl =
+										nft.metadata?.image ||
+										nft.previews?.[0]?.url ||
+										nft.previews?.[nft.previews.length - 1]?.url;
+									const name = nft.metadata?.name || `NFT #${index + 1}`;
+									const description = nft.metadata?.description || "";
+
+									return (
+										<div
+											key={nft.address || index}
+											style={{
+												background: "rgba(0, 0, 0, 0.2)",
+												borderRadius: "12px",
+												overflow: "hidden",
+												border: "1px solid rgba(255, 255, 255, 0.2)",
+												transition: "transform 0.2s",
+												cursor: "pointer",
+											}}
+											onMouseEnter={(e) => {
+												e.currentTarget.style.transform = "scale(1.05)";
+											}}
+											onMouseLeave={(e) => {
+												e.currentTarget.style.transform = "scale(1)";
+											}}
+										>
+											{imageUrl ? (
+												<img
+													src={imageUrl}
+													alt={name}
+													style={{
+														width: "100%",
+														height: "150px",
+														objectFit: "cover",
+														background: "rgba(0, 0, 0, 0.3)",
+													}}
+													onError={(e) => {
+														e.target.style.display = "none";
+													}}
+												/>
+											) : (
+												<div
+													style={{
+														width: "100%",
+														height: "150px",
+														background: "rgba(0, 0, 0, 0.3)",
+														display: "flex",
+														alignItems: "center",
+														justifyContent: "center",
+														fontSize: "12px",
+														opacity: 0.5,
+													}}
+												>
+													No Image
+												</div>
+											)}
+											<div style={{ padding: "12px" }}>
+												<p
+													style={{
+														margin: "0 0 4px 0",
+														fontSize: "14px",
+														fontWeight: "500",
+														overflow: "hidden",
+														textOverflow: "ellipsis",
+														whiteSpace: "nowrap",
+													}}
+													title={name}
+												>
+													{name}
+												</p>
+												{description && (
+													<p
+														style={{
+															margin: 0,
+															fontSize: "11px",
+															opacity: 0.7,
+															overflow: "hidden",
+															textOverflow: "ellipsis",
+															whiteSpace: "nowrap",
+														}}
+														title={description}
+													>
+														{description}
+													</p>
+												)}
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						)}
 					</div>
 
 					{/* Raw Wallet Data (for debugging) */}
